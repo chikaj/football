@@ -1,0 +1,29 @@
+﻿Line Item,Qty,Rate,Periods
+Annual CoFL franchise fee,1,50000,1
+"Legal fees (setup, contracts) - one-time Y1",1,7500,1
+Accounting / bookkeeping (ongoing),12,750,1
+Insurance - general liability,1,18000,1
+Insurance - player accident & workers' comp,1,22000,1
+Insurance - D&O for board,1,5000,1
+Marketing & advertising (digital + print),12,2000,1
+"Website hosting, ticketing platform fees",12,500,1
+Payment processing (3% of ticket+merch+conc.),1,0.03,1
+Background checks (60 staff/players @ $50),60,50,1
+Player meals / training table,50,15,36
+Medical supplies / training room consumables,1,5000,1
+Concussion baseline testing,60,75,1
+"Field paint, chalk, line marking",1,2500,1
+"Towel, laundry & equipment cleaning",12,250,1
+Photography / videography (per game),3,750,1
+Livestream production (per home game),3,1500,1
+Statistician & official scorer,3,200,1
+PR / publicist retainer,12,1500,1
+Player recruitment & tryout costs,1,8000,1
+League dues beyond franchise (assessments),1,5000,1
+Tax prep & annual audit,1,6000,1
+Travel insurance (away games),3,500,1
+Replay / instant review equipment,1,3000,1
+Office rent / shared workspace,12,1200,1
+"Phones, internet, software (Slack, MS365)",12,400,1
+Bank fees & merchant account,12,150,1
+Contingency (5% of base opex),1,0.05,1

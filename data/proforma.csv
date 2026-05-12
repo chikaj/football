@@ -1,0 +1,61 @@
+﻿Line Item,Category,Quantity,Units,Unit cost,# Games,Total,Notes
+Premium tickets (between 40-yd lines),Revenue,200,Seats,35.00,3,21000.00,Per breakeven workbook
+Reserved tickets (between 30-40 yd lines),Revenue,400,Seats,25.00,3,30000.00,Per breakeven workbook
+General admission,Revenue,"1,000",Seats,15.00,3,45000.00,Per breakeven workbook
+Group sales,Revenue,275,Groups,10.00,3,8250.00,Per breakeven workbook
+Concessions (50% of attendees @ $10),Revenue,938,Quantity,10.00,3,28140.00,Per breakeven workbook
+Beer garden (10% of attendees @ $25),Revenue,188,Quantity,25.00,3,14100.00,Per breakeven workbook
+Sponsorships (net 20% commission),Revenue,1,Quantity,131600.00,1,131600.00,Per breakeven workbook
+Food truck rental,Revenue,10,Quantity,250.00,3,7500.00,Per breakeven workbook
+Merchandise (20% of attendees @ $20),Revenue,375,Quantity,20.00,3,22500.00,Per breakeven workbook
+50/50 raffle,Revenue,1,Quantity,2000.00,3,6000.00,Per breakeven workbook
+WeFunder community equity campaign,Revenue,100,Quantity,1000.00,1,100000.00,One-time fundraise (NOT recurring)
+"Front office (salaries, benefits, overhead)",Operational Expenses,1,Quantity,24000.00,1,24000.00,Per breakeven workbook
+"Game uniforms (jersey & pants, 2 sets)",Operational Expenses,2,Quantity,175.00,50,17500.00,Per breakeven workbook
+Practice uniforms (jersey & shorts),Operational Expenses,1,Quantity,80.00,50,4000.00,Per breakeven workbook
+Helmets,Operational Expenses,1,Quantity,500.00,50,25000.00,Per breakeven workbook
+Shoulder pads,Operational Expenses,1,Quantity,300.00,50,15000.00,Per breakeven workbook
+Player / coach apparel,Operational Expenses,1,Quantity,70.00,50,3500.00,Per breakeven workbook
+CoFL footballs (practice & game),Operational Expenses,1,Quantity,175.00,16,2800.00,Per breakeven workbook
+Athletic trainers (stipend per week),Operational Expenses,8,Quantity,500.00,2,8000.00,Per breakeven workbook
+Rose Stadium rental (linked from Sheet 3),Game Day Expenses,,Quantity,,,21180.00,REPLACES the $3K placeholder; full per-game build on Sheet 3
+Practice facility fee,Game Day Expenses,21,Quantity,100.00,1,2100.00,Per breakeven workbook
+Coaches stipend (assistant coaches),Game Day Expenses,6,Quantity,1000.00,7,42000.00,Per breakeven workbook
+Head coach stipend,Game Day Expenses,1,Quantity,60000.00,1,60000.00,Per breakeven workbook
+Equipment manager,Game Day Expenses,6,Quantity,500.00,1,3000.00,Per breakeven workbook
+Officials (refs),Game Day Expenses,3,Quantity,125.00,6,2250.00,Per breakeven workbook
+Player housing (dbl occupancy),Game Day Expenses,43,Quantity,54.00,20,46440.00,Per breakeven workbook
+Player pay,Game Day Expenses,6,Quantity,400.00,38,91200.00,Per breakeven workbook
+Quarterback pay,Game Day Expenses,6,Quantity,750.00,2,9000.00,Per breakeven workbook
+"Game day workers (additional, not in stadium)",Game Day Expenses,3,Quantity,120.00,30,10800.00,Per breakeven workbook
+Per diem (50 travel party),Away Game Logistics,50,Quantity,50.00,3,7500.00,Per breakeven workbook
+Bus transportation,Away Game Logistics,1,Quantity,5000.00,3,15000.00,Per breakeven workbook
+Hotel (30 rooms x 1 night),Away Game Logistics,30,Quantity,100.00,3,9000.00,Per breakeven workbook
+Annual CoFL franchise fee,League-Franchise-Corporate Overhead,1,Quantity,50000.00,1,50000.00,Per user instruction
+"Legal fees (setup, contracts) - one-time Y1",League-Franchise-Corporate Overhead,1,Quantity,7500.00,1,7500.00,Per user instruction (mid of $5-10K)
+Accounting / bookkeeping (ongoing),League-Franchise-Corporate Overhead,12,Quantity,750.00,1,9000.00,$750/mo CPA + Quickbooks
+Insurance - general liability,League-Franchise-Corporate Overhead,1,Quantity,18000.00,1,18000.00,"Crowd events, ~$18K/yr"
+Insurance - player accident & workers' comp,League-Franchise-Corporate Overhead,1,Quantity,22000.00,1,22000.00,Roster-based
+Insurance - D&O for board,League-Franchise-Corporate Overhead,1,Quantity,5000.00,1,5000.00,Director & Officer coverage
+Marketing & advertising (digital + print),League-Franchise-Corporate Overhead,12,Quantity,2000.00,1,24000.00,$24K/yr campaign
+"Website hosting, ticketing platform fees",League-Franchise-Corporate Overhead,12,Quantity,500.00,1,6000.00,Hosting + ticket platform 4-5%
+Payment processing (3% of ticket+merch+conc.),League-Franchise-Corporate Overhead,1,Quantity,,1,5070.00,Modeled separately - see formula
+Background checks (60 staff/players @ $50),League-Franchise-Corporate Overhead,60,Quantity,50.00,1,3000.00,Per person
+Player meals / training table,League-Franchise-Corporate Overhead,50,Quantity,15.00,36,27000.00,~36 practice days x $15 x 50 players
+Medical supplies / training room consumables,League-Franchise-Corporate Overhead,1,Quantity,5000.00,1,5000.00,"Tape, ice, supplements, etc."
+Concussion baseline testing,League-Franchise-Corporate Overhead,60,Quantity,75.00,1,4500.00,Per player + coach
+"Field paint, chalk, line marking",League-Franchise-Corporate Overhead,1,Quantity,2500.00,1,2500.00,Annual supply
+"Towel, laundry & equipment cleaning",League-Franchise-Corporate Overhead,12,Quantity,250.00,1,3000.00,$250/mo service
+Photography / videography (per game),League-Franchise-Corporate Overhead,3,Quantity,750.00,1,2250.00,Game-day media
+Livestream production (per home game),League-Franchise-Corporate Overhead,3,Quantity,1500.00,1,4500.00,"Camera, encoder, crew"
+Statistician & official scorer,League-Franchise-Corporate Overhead,3,Quantity,200.00,1,600.00,Per game
+PR / publicist retainer,League-Franchise-Corporate Overhead,12,Quantity,1500.00,1,18000.00,$18K/yr
+Player recruitment & tryout costs,League-Franchise-Corporate Overhead,1,Quantity,8000.00,1,8000.00,"Tryout camps, scouting"
+League dues beyond franchise (assessments),League-Franchise-Corporate Overhead,1,Quantity,5000.00,1,5000.00,Avg league assessments
+Tax prep & annual audit,League-Franchise-Corporate Overhead,1,Quantity,6000.00,1,6000.00,CPA prep + light audit
+Travel insurance (away games),League-Franchise-Corporate Overhead,3,Quantity,500.00,1,1500.00,Per away trip
+Replay / instant review equipment,League-Franchise-Corporate Overhead,1,Quantity,3000.00,1,3000.00,Sideline tablets
+Office rent / shared workspace,League-Franchise-Corporate Overhead,12,Quantity,1200.00,1,14400.00,$14.4K/yr small office
+"Phones, internet, software (Slack, MS365)",League-Franchise-Corporate Overhead,12,Quantity,400.00,1,4800.00,$4.8K/yr
+Bank fees & merchant account,League-Franchise-Corporate Overhead,12,Quantity,150.00,1,1800.00,$1.8K/yr
+Contingency (5% of base opex),League-Franchise-Corporate Overhead,1,Quantity,,1,20964.00,Modeled separately - see formula

@@ -1,0 +1,12 @@
+﻿Line Item,Qty/Seats,$/Unit,# Games
+Premium tickets (between 40-yd lines),200,35,3
+Reserved tickets (between 30-40 yd lines),400,25,3
+General admission,1000,15,3
+Group sales,275,10,3
+Concessions (50% of attendees @ $10),937.5,10,3
+Beer garden (10% of attendees @ $25),187.5,25,3
+Sponsorships (net 20% commission),1,131600,1
+Food truck rental,10,250,3
+Merchandise (20% of attendees @ $20),375,20,3
+50/50 raffle,1,2000,3
+WeFunder community equity campaign,100,1000,1
