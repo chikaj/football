@@ -1,0 +1,591 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.23.5"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "name": "_",
+      "code": "import marimo as mo\n\nimport os\nfrom pathlib import Path\nimport base64\nimport re\n\nimport pandas as pd\nimport numpy as np\nimport scipy as sp\nfrom scipy import stats\nimport polars as pl\nimport polars.selectors as cs\nimport plotly.express as px\nimport altair as alt\nfrom great_tables import GT, md, html, vals, loc, style\nfrom great_tables.data import sza\n\nimport numpy_financial as npf\nimport yfinance as yf\nfrom fredapi import Fred\n\nFRED_API_KEY = os.getenv(\"FRED_API_KEY\")\n\n# Safe check\nif FRED_API_KEY:\n    print(\"FRED API key loaded successfully ✅\")\nelse:\n    print(\"FRED API key not found ❌\")\n\nfred = Fred(api_key=FRED_API_KEY)",
+      "code_hash": null,
+      "config": {
+        "column": 0,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "MJUe",
+      "name": "_",
+      "code": "",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "vblA",
+      "name": "_",
+      "code": "# mo.image(\"img/Rosestadium.jfif\", width=\"100%\")\n\nwith open(\"img/Rosestadium.jfif\", \"rb\") as f:\n    img_b64 = base64.b64encode(f.read()).decode()\nmo.Html(f\"\"\"\n<div style=\"position: relative; width: 100%;\">\n    <img src=\"data:image/jpeg;base64,{img_b64}\" style=\"width: 100%; display: block;\">\n    <h1 style=\"position: absolute; top: 20px; left: 20px; padding: 16px 24px; margin: 0;\n       color: black; font-size: 3rem;\n       background: rgba(255, 255, 255, 0.4);\n       border-radius: 8px;\">\n        Continental Football League\n    </h1>\n</div>\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": 1,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "eOxQ",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n# Continental Football League\n## A Tyler, Texas Franchise Possibility\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    },
+    {
+      "id": "PKri",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n1. Launches summer 2026 — an 8-team professional minor league playing a 6-week season from late May through early July, headquartered in Wheeling, West Virginia.\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "Xref",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n2. Commissioner Mike Kelly — former Winnipeg Blue Bombers head coach with 45+ years of experience across NCAA, CFL, NFL, and XFL.\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "SFPL",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n3. \"The Continental Shift\" — a unique rule gimmick where the 4th quarter switches from American rules to CFL-style (3 downs, waggle motion, rouge). The league also uses the original CoFL's sudden-death overtime innovation.\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "BYtC",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n4. Fan/community ownership model — teams are community-owned with fan minority ownership stakes, registered with the SEC, modeled after the Green Bay Packers and CFL teams.\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "RGSE",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n5. 8 announced teams — North Division: Ohio Valley Ironmen, Cincinnati Dukes, Indianapolis Capitols, Norfolk Neptunes. South Division: Fort Worth Braves, San Antonio Toros, Tall City Black Gold, Texas Syndicate.\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "Kclp",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n# Continental Football League\n## The Financial Model\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "sKik",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n1. Crowdfunding. Regulation Crowdfunding (Reg CF) is an SEC rule allowing private companies to raise up to $5M/year from non-accredited investors through registered funding portals. The Continental Football Leagure uses WeFunder.\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    },
+    {
+      "id": "OLgk",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n2. Continental Football League teams will NOT be publicly traded. They are private companies that use the Reg CF exemption to sell shares to non-accredited ('fan') investors without doing a full IPO. There are no stock exchange listings, no ticker symbols, and no continuous SEC reporting.\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    },
+    {
+      "id": "xMBQ",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n3. Teams will be SEC-registered and compliant (Wefunder will file a 'Form C' with the SEC), which means they will disclose the offering terms, risks, financials and use of their proceeds. This is a one-off filing for the fundraising round, not ongoing public registration.\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    },
+    {
+      "id": "lfzb",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n4. Shares are illiquid. Fans buy in through the WeFunder campaign and there is no secondary market.\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    },
+    {
+      "id": "LCZx",
+      "name": "_",
+      "code": "",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    },
+    {
+      "id": "emfo",
+      "name": "_",
+      "code": "assumptions_raw = pl.read_csv(\"data/assumptions.csv\")\n\n# mo.vstack([\n#     mo.md(\"# Basic Assumptions\"),\n#     assumptions_raw\n# ])\n\nfinancial_assumption_raw   = assumptions_raw.slice(0, 2)   # Annual revenue growth, expense inflation\nstadium_assumption_raw     = assumptions_raw.slice(2, 4)   # Home games, capacity, attendance\nfees_assumption_raw        = assumptions_raw.slice(6, 2)   # Franchise fee, legal/accounting\npopulation_assumption_raw  = assumptions_raw.slice(8, 3)   # 3 population figures\nmo.vstack([\n    mo.md(\"# Basic Assumptions\"),\n    mo.hstack([financial_assumption_raw, stadium_assumption_raw], widths=[0.5, 0.5]),\n    mo.hstack([fees_assumption_raw, population_assumption_raw], widths=[0.5, 0.5]),\n])",
+      "code_hash": null,
+      "config": {
+        "column": 2,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "Hstk",
+      "name": "_",
+      "code": "stadium_rental_raw = pl.read_csv(\"data/stadium_per_game_rental.csv\")\n# stadium_rental_df = stadium_rental_df.with_columns(\n#     Total = pl.col(\"Hours / Qty\") * pl.col(\"Rate\")\n# )\n\nmo.vstack([\n    mo.md(\"# Stadium Rental\"),\n    stadium_rental_raw\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "nWHF",
+      "name": "_",
+      "code": "startup_costs_raw = pl.read_csv(\"data/startup1.csv\").with_columns(\n    Amount = (pl.col(\"Low\") + pl.col(\"High\")) / 2\n).drop(\"Low\", \"High\")\n\nmo.vstack([\n    mo.md(\"# Startup Costs\"),\n    startup_costs_raw\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "iLit",
+      "name": "manual_form",
+      "code": "# Manually create assumptions form\nass_form = (\n    mo.md(\n    '''\n        a. {a} CoFL Franchise entry fee (one-time, est.)\n\n        b. {b} Legal setup (LLC, contracts, IP, league agreements)\n\n        c. {c} Accounting setup (chart of accounts, payroll, books)\n\n        d. {d} Insurance binding & annual prepay (GL, D&O, accident)\n\n        e. {e} Branding / Identity (logo, mark, trademark search)\n\n        f. {f} Website + ticketing platform setup\n\n        g. {g} Equipment - Helmets (50 @ $500)\n\n        h. {h} Equipment - Shoulder pads (50 @ $300)\n\n        i. {i} Equipment - Practice gear, sleds, blocking dummies\n\n        j. {j} Game uniforms (2 sets, 50 players)\n\n        k. {k} Practice uniforms (1 set, 50 players)\n\n        l. {l} Office setup (computers, software, furniture)\n\n        m. {m} Initial marketing & launch campaign\n\n        n. {n} WeFunder campaign filing & escrow setup\n\n        o. {o} Stadium / facility deposits\n\n        p. {p} Working capital reserve (3 months opex)\n\n    '''\n    )\n    .batch(\n        a=mo.ui.slider(50000, 50000, value=50000),\n        b=mo.ui.slider(5000, 10000, value=7500),\n        c=mo.ui.slider(3000, 5000, value=4000),\n        d=mo.ui.slider(25000, 50000, value=37500),\n        e=mo.ui.slider(8000, 20000, value=14000),\n        f=mo.ui.slider(8000, 15000, value=11500),\n        g=mo.ui.slider(25000, 25000, value=25000),\n        h=mo.ui.slider(15000, 15000, value=15000),\n        i=mo.ui.slider(15000, 30000, value=22500),\n        j=mo.ui.slider(17500, 17500, value=17500),\n        k=mo.ui.slider(4000, 4000, value=4000),\n        l=mo.ui.slider(10000, 25000, value=17500),\n        m=mo.ui.slider(25000, 50000, value=37500),\n        n=mo.ui.slider(5000, 10000, value=7500),\n        o=mo.ui.slider(5000, 10000, value=7500),\n        p=mo.ui.slider(100000, 200000, value=150000)\n\n    )\n    .form(show_clear_button=True, clear_button_label=\"Reset\", bordered=False)\n)\n# assumptions_form",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "ZHCJ",
+      "name": "_",
+      "code": "# startup_cost_controls = {\n#     f\"id_{row['id']}\": mo.ui.slider(\n#         row[\"min\"],\n#         row[\"max\"],\n#         value=row[\"mid\"]\n#     )\n#     for row in startup.iter_rows(named=True)\n# }\n\n# startup_cost_template_text = \"\\n\\n\".join(\n#     f'{{id_{row[\"id\"]}}} {row[\"Cost Category\"]}'\n#     for row in startup.iter_rows(named=True)\n\n# )\n\n# startup_cost_form = (\n#     mo.md(startup_cost_template_text)\n#     .batch(**startup_cost_controls)\n#     .form(\n#         show_clear_button=True,\n#         clear_button_label=\"Reset\",\n#         bordered=False,\n#     )\n# )",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "ROlb",
+      "name": "_",
+      "code": "startup_funding_raw = pl.read_csv(\"data/startup_funding.csv\")\n\nmo.vstack([\n    mo.md(\"# Startup Funding\"),\n    startup_funding_raw\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "qnkX",
+      "name": "_",
+      "code": "# startup_funding_controls = {\n#     f\"id_{row['id']}\": mo.ui.slider(\n#         row[\"amount\"] - row[\"amount\"]/2,\n#         row[\"amount\"] + row[\"amount\"]/2,\n#         value=row[\"amount\"]\n#     )\n#     for row in startup_funding.iter_rows(named=True)\n# }\n\n# startup_funding_template_text = \"\\n\\n\".join(\n#     f'{{id_{row[\"id\"]}}} {row[\"source\"]}'\n#     for row in startup_funding.iter_rows(named=True)\n\n# )\n\n# startup_funding_form = (\n#     mo.md(startup_funding_template_text)\n#     .batch(**startup_funding_controls)\n#     .form(\n#         show_clear_button=True,\n#         clear_button_label=\"Reset\",\n#         bordered=False,\n#     )\n# )\n\n# # startup_funding_controls\n# # startup_funding_template_text\n# # startup_funding_form",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "TqIu",
+      "name": "_",
+      "code": "proforma_revenue_raw = pl.read_csv(\"data/proforma-revenue.csv\")\nproforma_revenue_raw = proforma_revenue_raw.filter(~pl.col(\"Line Item\").str.contains(\"Concessions|Beer garden|Merchandise\"))\n\nmo.vstack([\n    mo.md(\"# Proforma Revenue\"),\n    proforma_revenue_raw\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "Vxnm",
+      "name": "_",
+      "code": "proforma_opex_raw = pl.read_csv(\"data/proforma-opex.csv\")\n\nmo.vstack([\n    mo.md(\"# Proforma Operating Expenses\"),\n    proforma_opex_raw\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "DnEU",
+      "name": "_",
+      "code": "proforma_gameday_raw = pl.read_csv(\"data/proforma-game-day-expenses.csv\")\nproforma_gameday_raw = proforma_gameday_raw.filter(~pl.col(\"Line Item\").str.contains(\"Rose\"))\n\nmo.vstack([\n    mo.md(\"# Proforma Game Day Expenses\"),\n    proforma_gameday_raw\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "ulZA",
+      "name": "_",
+      "code": "proforma_awayday_raw = pl.read_csv(\"data/proforma-awaygame-expenses.csv\")\n\nmo.vstack([\n    mo.md(\"# Proforma Away Game Expenses\"),\n    proforma_awayday_raw\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "ecfG",
+      "name": "_",
+      "code": "proforma_overhead_raw = pl.read_csv(\"data/proforma-overhead.csv\")\nproforma_overhead_raw = proforma_overhead_raw.filter(~pl.col(\"Line Item\").str.contains(\"Annual CoFL|Payment processing|Contingency\"))\n\n\nmo.vstack([\n    mo.md(\"# Proforma Overhead Expenses\"),\n    proforma_overhead_raw\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "Pvdt",
+      "name": "_",
+      "code": "",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "ZBYS",
+      "name": "_",
+      "code": "##### Cell A #####\n# Cell A:          editor = mo.ui.data_editor(raw_df)\n#                          ↓ (user edits)\n# Cell B:          df = editor.value.with_columns(Total=...)\n#                          ↓ (marimo re-runs this cell)\n# Cell C:          GT(df)\n\nedit_switch = mo.ui.switch()\n\n# Assumptions\n# assumptions_editor = mo.ui.data_editor(assumptions_raw)\nfinancial_assumption_editor = mo.ui.data_editor(financial_assumption_raw)\nstadium_assumption_editor = mo.ui.data_editor(stadium_assumption_raw)\npopulation_assumption_editor = mo.ui.data_editor(population_assumption_raw)\n\n# Stadium Costs\nstadium_editor = mo.ui.data_editor(stadium_rental_raw)\n\n# Startup Costs\nstartup_costs_editor = mo.ui.data_editor(startup_costs_raw)\n\n# Startup Funding\nstartup_funding_editor = mo.ui.data_editor(startup_funding_raw)\n\n# Proforma\nproforma_revenue_editor = mo.ui.data_editor(proforma_revenue_raw)\nproforma_opex_editor = mo.ui.data_editor(proforma_opex_raw)\nproforma_gameday_editor = mo.ui.data_editor(proforma_gameday_raw)\nproforma_awayday_editor = mo.ui.data_editor(proforma_awayday_raw)\nproforma_overhead_editor = mo.ui.data_editor(proforma_overhead_raw)",
+      "code_hash": null,
+      "config": {
+        "column": 3,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "wDJQ",
+      "name": "_",
+      "code": "##### Cell B - this is where I add computed columns!! #####\n# Cell A:          editor = mo.ui.data_editor(raw_df)\n#                          ↓ (user edits)\n# Cell B:          df = editor.value.with_columns(Total=...)\n#                          ↓ (marimo re-runs this cell)\n# Cell C:          GT(df)\n\nfinancial_assumption_df = financial_assumption_editor.value\nstadium_assumption_df = stadium_assumption_editor.value\npopulation_assumption_df = population_assumption_editor.value\n\n# Stadium Costs\nstadium_df = stadium_editor.value.with_columns(\n     Total=pl.col(\"Hours / Qty\") * pl.col(\"Rate\")\n)\n\n# Startup Costs\nstartup_costs_df = startup_costs_editor.value\n\n# Startup Funding\nstartup_funding_df = startup_funding_editor.value\n\n# Proforma\nproforma_revenue_df = proforma_revenue_editor.value.with_columns(\n    Amount = pl.col(\"Qty/Seats\") * pl.col(\"$/Unit\") * pl.col(\"# Games\")\n)\nproforma_opex_df = proforma_opex_editor.value.with_columns(\n    Amount = pl.col(\"Units\") * pl.col(\"Cost\") * pl.col(\"Quantity\")\n)\nproforma_gameday_df = proforma_gameday_editor.value.with_columns(\n    Amount = pl.col(\"Games/Days\") * pl.col(\"Per Game\") * pl.col(\"People\")\n)\nproforma_awayday_df = proforma_awayday_editor.value.with_columns(\n    Amount = pl.col(\"Qty\") * pl.col(\"$ per\") * pl.col(\"# Games\")\n)\nproforma_overhead_df = proforma_overhead_editor.value.with_columns(\n    Amount = pl.col(\"Qty\") * pl.col(\"Rate\") * pl.col(\"Periods\")\n)",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": true,
+        "disabled": false
+      }
+    },
+    {
+      "id": "aLJB",
+      "name": "_",
+      "code": "##### Cell C #####\n\nif edit_switch.value:\n    output = mo.ui.tabs({\n        \"Assumptions\": mo.vstack([\n            mo.vstack([mo.md(\"\"\" Projected Growth\"\"\"), financial_assumption_editor]),\n            mo.vstack([mo.md(\"\"\" Stadium Usage\"\"\"), stadium_assumption_editor]),\n            mo.vstack([mo.md(\"\"\" Local Population\"\"\"), stadium_assumption_editor]),\n        ]),\n        \"Stadium Rental\": stadium_editor,\n        \"Startup Costs\": startup_costs_editor,\n        \"Funding Sources\": startup_funding_editor,\n        \"Proforma\": mo.vstack([\n            mo.vstack([mo.md(\"### Revenue\"), proforma_revenue_editor]),\n            mo.vstack([mo.md(\"### Operating Expenses\"), proforma_opex_editor]),\n            mo.vstack([mo.md(\"### Game Day Expenses\"), proforma_gameday_editor]),\n            mo.vstack([mo.md(\"### Away Game Expenses\"), proforma_awayday_editor]),\n            mo.vstack([mo.md(\"### Overhead Expenses\"), proforma_overhead_editor]),\n        ]),\n        # \"10-Year Forecast\": \"nada\",\n        # \"Analysis Table\": \"nada\"\n    }).center()\nelse:\n    output = mo.ui.tabs({\n        \"Assumptions\": mo.vstack([\n            GT(financial_assumption_df, rowname_col=\"Assumption\")\n                .fmt_percent(\"Value\"),\n            GT(stadium_assumption_df, rowname_col=\"Assumption\")\n                .fmt_integer(\"Value\"),\n            GT(population_assumption_df, rowname_col=\"Assumption\")\n                .fmt_integer(\"Value\"),\n        ]),\n        \"Stadium Rental\": (\n            GT(stadium_df, rowname_col=\"Line Item\")\n            .tab_header(title=\"Stadium Rental\")\n            .fmt_currency([\"Rate\",\"Total\"])\n            .grand_summary_rows(\n                fns={\n                    \"Total\": pl.sum(\"Total\")\n                },\n                fmt=vals.fmt_currency\n            )\n        ),\n        \"Startup Costs\": (\n            GT(startup_costs_df, rowname_col=\"Cost Category\")\n            .tab_header(title=\"Startup Costs\")\n            .fmt_currency(columns=[\"Amount\"], decimals=0)\n            .grand_summary_rows(\n                fns={\n                    \"Total\": pl.sum(\"Amount\")\n                },\n                fmt = vals.fmt_currency\n            )\n        ),\n        \"Funding Sources\": (\n            GT(startup_funding_df, rowname_col=\"Source\")\n            .tab_header(title=\"Startup Funding\")\n            .fmt_currency(\"Amount\")\n            .grand_summary_rows(\n                fns={\n                    \"Total\": pl.sum(\"Amount\")\n                },\n                fmt=vals.fmt_currency\n            )\n        ),\n        \"Proforma\": mo.vstack([\n            GT(proforma_revenue_df, rowname_col=\"Line Item\")\n            .tab_header(title=\"Revenue\")\n            .tab_style(style.fill(\"green\"), loc.header())\n            .fmt_currency([\"$/Unit\", \"Amount\"])\n            .fmt_integer(\"Qty/Seats\")\n            .grand_summary_rows(\n                fns={\n                    \"Total\": pl.sum(\"Amount\")\n                },\n                fmt=vals.fmt_currency\n            ),\n            GT(proforma_opex_df, rowname_col=\"Line Item\")\n            .tab_header(title=\"Operating Expenses\")\n            .tab_style(style.fill(\"red\"), loc.header())\n            .fmt_currency([\"Cost\", \"Amount\"])\n            .grand_summary_rows(\n                fns={\n                    \"Total\": pl.sum(\"Amount\")\n                },\n                fmt=vals.fmt_currency\n            ),\n            GT(proforma_gameday_df, rowname_col=\"Line Item\")\n            .tab_header(title=\"Game Day Expenses\")\n            .tab_style(style.fill(\"red\"), loc.header())\n                .fmt_currency([\"Per Game\", \"Amount\"])\n            .grand_summary_rows(\n                fns={\n                    \"Total\": pl.sum(\"Amount\")\n                },\n                fmt=vals.fmt_currency\n            ),\n            GT(proforma_awayday_df, rowname_col=\"Line Item\")\n            .tab_header(title=\"Away Game Expenses\")\n            .tab_style(style.fill(\"red\"), loc.header())\n                .fmt_currency([\"$ per\", \"Amount\"])\n            .grand_summary_rows(\n                fns={\n                    \"Total\": pl.sum(\"Amount\")\n                },\n                fmt=vals.fmt_currency\n            ),\n            GT(proforma_overhead_df, rowname_col=\"Line Item\")\n            .tab_header(title=\"Overhead Expenses\")\n            .tab_style(style.fill(\"red\"), loc.header())\n            .fmt_currency([\"Rate\", \"Amount\"])\n            .grand_summary_rows(\n                fns={\n                    \"Total\": pl.sum(\"Amount\")\n                },\n                fmt=vals.fmt_currency\n            )\n        ])\n    }).center()\n\n\nmo.vstack([\n    mo.md(\"# Tyler, Texas Cost Estimates\"),\n    output,\n    mo.hstack([mo.md(\"Edit\"), edit_switch], justify=\"start\", gap=1)\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "nCBo",
+      "name": "_",
+      "code": "games_per_season = 3\nattendance = stadium_assumption_df[3, 1]\nfranchise_fee = startup_costs_df[0, 1]\n\nconcessions = attendance * 0.5 * 10 * 3\nbeer_garden = attendance * 0.1 * 25 * 3\nmerchandise = attendance * 0.2 * 20 * 3\nrevenue_y1 = proforma_revenue_df[\"Amount\"].sum() + concessions + beer_garden + merchandise\n\nstadium_rental_y1 = stadium_df[\"Total\"].sum() * games_per_season\nopex_y1 = proforma_opex_df[\"Amount\"].sum()\ngame_day_y1 = proforma_gameday_df[\"Amount\"].sum() + stadium_rental_y1\naway_day_y1 = proforma_awayday_df[\"Amount\"].sum()\n\ncontingency = (game_day_y1 + away_day_y1 + opex_y1) * 0.05\npayment_fees = (proforma_revenue_df[:4].select(pl.col(\"Amount\").sum()).item() + concessions * 3 + beer_garden * 3 + merchandise * 3) * 0.03\noverhead_y1 = proforma_overhead_df[\"Amount\"].sum() + franchise_fee + contingency + payment_fees",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    },
+    {
+      "id": "FUND",
+      "name": "_",
+      "code": "merchandise",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    },
+    {
+      "id": "Fwij",
+      "name": "_",
+      "code": "w = proforma_revenue_df\nw",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    },
+    {
+      "id": "OTxk",
+      "name": "_",
+      "code": "annual_total = pl.DataFrame([\n    revenue_y1,\n    opex_y1,\n    game_day_y1,\n    away_day_y1,\n    overhead_y1\n])\nannual_total",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    },
+    {
+      "id": "rzYi",
+      "name": "_",
+      "code": "",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    },
+    {
+      "id": "xXTn",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n# Discount and Growth Rate Calculations\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": 4,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "AjVT",
+      "name": "_",
+      "code": "# Uncomment to use yfinance directly\n# tickers = [\"SPY\", \"TKO\", \"FWONA\", \"MANU\"]\n# data = yf.download(tickers, start=\"2006-01-01\", interval=\"1mo\")\n# returns = data[\"Close\"].pct_change().dropna()\n\nreturns = pd.read_parquet(\"data/yfcomparables.parquet\")\n\nmo.vstack([\n    mo.md(rf\"## $\\beta$ Calculation\"),\n    returns\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "pHFh",
+      "name": "_",
+      "code": "# Scatterplot visualization\ndf = returns[[\"SPY\", \"TKO\", \"FWONA\", \"MANU\"]].reset_index().melt(\n    id_vars=[\"Date\", \"SPY\"], value_vars=[\"TKO\", \"FWONA\", \"MANU\"],\n    var_name=\"Ticker\", value_name=\"Return\"\n)\nfig = px.scatter(\n    df, x=\"SPY\", y=\"Return\", color=\"Ticker\",\n    labels={\"SPY\": \"SPY Monthly Return\", \"Return\": \"Monthly Return\"},\n    title=\"Monthly Returns vs SPY\",\n    trendline=\"ols\"\n)\nfig.add_hline(y=0, line_color=\"grey\", line_width=0.5)\nfig.add_vline(x=0, line_color=\"grey\", line_width=0.5)\n\n# Regression\nresults = px.get_trendline_results(fig)\ncoeffs = {}\nfor _, row in results.iterrows():\n    ticker = row[\"Ticker\"]\n    fit = row[\"px_fit_results\"]\n    coeffs[ticker] = {\n        \"Slope\": fit.params[1],\n        \"Intercept\": fit.params[0],\n        \"R²\": fit.rsquared\n    }\ncoeff_df = (\n    pd.DataFrame(coeffs)\n    .T\n    .round(4)\n    .rename_axis(\"Ticker\")\n    .reset_index()\n)\n\nbeta = coeff_df[\"Slope\"].mean()\n\nmo.vstack([\n    mo.ui.plotly(fig),\n    mo.md(\"### Regression Coefficients (vs SPY)\"),\n    mo.ui.table(coeff_df),\n    mo.md(f\"### Average Beta: {beta:.4f}\")\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "NCOB",
+      "name": "_",
+      "code": "kroll_erp = 0.05\nkroll_rf = 0.035 \n\ntwenty_yr = fred.get_series('DGS20')  # returns a pandas Series\nspot_treasury_yield = twenty_yr.iloc[-1] / 100  # convert from \n\nrfr = max(kroll_rf, spot_treasury_yield)\n\nfootball_discount_rate = rfr + beta * kroll_erp\n\nmo.vstack([\n    mo.md(\"\"\"\n        ## Capital Asset Pricing Model: total discount rate\n    \"\"\"),\n    mo.md(rf\"\"\"\n        ---\n        * Risk free rate (higher of {kroll_rf} or the spot treasury yield[^1^](https://www.kroll.com/en/reports/cost-of-capital/recommended-us-equity-risk-premium-and-corresponding-risk-free-rates)): {rfr:.4f}\n        * Average Beta: {beta:.4f}\n        * Kroll Equity Risk Premium: {kroll_erp:.4f}\n    \"\"\"),\n    mo.md(rf\"\"\"\n        ---\n        ### $r = R_f + \\beta \\times ERP$\n        ### $r = {rfr:.4f} + {beta:.4f} * {kroll_erp:.4f}$\n        ### $r = {football_discount_rate:.4f}$ or {football_discount_rate*100:.2f}%\n    \"\"\")\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "aqbW",
+      "name": "_",
+      "code": "# Growth Rate calculations",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "TRpd",
+      "name": "_",
+      "code": "# Uncomment to use FRED api directly\n# gdp_nom = fred.get_series('GDP')\n# gdp_real = fred.get_series('GDPC1')\n# gdp = pd.DataFrame({\n#     'Nominal GDP': gdp_nom,\n#     'Real GDP': gdp_real\n# }).resample('YE').last().dropna()\n# gdp.index = gdp.index.year\n# gdp.index.name = 'Year'\n\n# Comment the following line if using the FRED api directly\ngdp = pd.read_parquet(\"data/fredgdp.parquet\")\n\ngdp",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "TXez",
+      "name": "_",
+      "code": "fig1 = px.line(\n    gdp, x=gdp.index, y=['Nominal GDP', 'Real GDP'],\n    title='Annual GDP (Levels)',\n    labels={'value': 'Billions of $', 'index': 'Year', 'variable': ''},\n)\n\nmo.vstack([\n    mo.md(\"## Growth Rate Calculation\"),\n    mo.ui.plotly(fig1)\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "dNNg",
+      "name": "_",
+      "code": "gdp['ln(Nominal GDP)'] = np.log(gdp['Nominal GDP'])\ngdp['ln(Real GDP)'] = np.log(gdp['Real GDP'])\n\nfig2 = px.line(\n    gdp, x=gdp.index, y=['ln(Nominal GDP)', 'ln(Real GDP)'],\n    title='Log of Annual GDP',\n    labels={'value': 'ln(Billions of $)', 'index': 'Year', 'variable': ''},\n)\n\nfor col, color in zip(['ln(Nominal GDP)', 'ln(Real GDP)'], ['blue', 'red']):\n    slope, intercept = np.polyfit(gdp.index, gdp[col], 1)\n    trend = intercept + slope * gdp.index\n    fig2.add_scatter(x=gdp.index, y=trend, mode='lines',\n                     name=f'{col} trend', line=dict(dash='dash', color=color))\n\ncoeffs_gdp = {}\nfor col_gdp in ['ln(Nominal GDP)', 'ln(Real GDP)']:\n    slope_gdp, intercept_gdp, r_value, p_value, std_err = stats.linregress(gdp.index, gdp[col_gdp])\n    coeffs_gdp[col_gdp] = {\n        'Slope': slope_gdp,\n        'Intercept': intercept_gdp,\n        'R²': r_value**2,\n        'Std Err': std_err,\n    }\n\ncoeff_gdp_df = (\n    pd.DataFrame(coeffs_gdp).T.round(4)\n    .rename_axis('Measure').reset_index()\n)\n\n# For year 2000+ analysis\ncutoff_year_min = 2010\ncutoff_year_max = 2019\ngdp_since_2000 = gdp.loc[cutoff_year_min: cutoff_year_max].copy()\n# gdp_since_2000 = gdp.loc[gdp.index >= cutoff_year_min].copy()\n\nfor col, color in zip(['ln(Nominal GDP)', 'ln(Real GDP)'], ['blue', 'red']):\n    slope_2k, intercept_2k = np.polyfit(gdp_since_2000.index, gdp_since_2000[col], 1)\n    trend_2k = intercept_2k + slope_2k * gdp_since_2000.index\n    fig2.add_scatter(\n        x=gdp_since_2000.index, y=trend_2k, mode='lines',\n        name=f'{col} trend (2000+)', line=dict(dash='solid', color=color, width=5)\n    )\n\ncoeffs_gdp2 = {}\nfor col_gdp in ['ln(Nominal GDP)', 'ln(Real GDP)']:\n    slope_gdp2, intercept_gdp2, r_value2, p_value2, std_err2 = stats.linregress(gdp_since_2000.index, gdp_since_2000[col_gdp])\n    coeffs_gdp2[col_gdp] = {\n        'Slope': slope_gdp2,\n        'Intercept': intercept_gdp2,\n        'R²': r_value2**2,\n        'Std Err': std_err2,\n    }\n\ncoeff_gdp2_df = (\n    pd.DataFrame(coeffs_gdp2).T.round(4)\n    .rename_axis('Measure').reset_index()\n)\n\nmo.vstack([\n    mo.ui.plotly(fig2),\n    mo.md('### Regression Coefficients (Log GDP)'),\n    mo.ui.table(coeff_gdp_df),\n    mo.md(f'### Regression Coefficients (Log GDP) {cutoff_year_min} to {cutoff_year_max}'),\n    mo.ui.table(coeff_gdp2_df),\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "yCnT",
+      "name": "_",
+      "code": "",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "wlCL",
+      "name": "_",
+      "code": "slope_nom = coeff_gdp_df.loc[coeff_gdp_df['Measure'] == 'ln(Nominal GDP)', 'Slope'].iloc[0]\nintercept_nom = coeff_gdp_df.loc[coeff_gdp_df['Measure'] == 'ln(Nominal GDP)', 'Intercept'].iloc[0]\nslope_nom2 = coeff_gdp2_df.loc[coeff_gdp2_df['Measure'] == 'ln(Nominal GDP)', 'Slope'].iloc[0]\nintercept_nom2 = coeff_gdp2_df.loc[coeff_gdp2_df['Measure'] == 'ln(Nominal GDP)', 'Intercept'].iloc[0]\n\n\ng_all_years = np.exp(slope_nom) - 1\ng_subset = np.exp(slope_nom2) - 1\nfootball_growth_rate = 0.04\n\nmo.md(rf\"\"\"\n    ### Regression Equation\n    #### $ln(GDP) = b + m (Year)$\n    ---\n    ## Nominal Growth Rate Calculations\n    ## $g_{{\\text{{all years}}}} = e^m - 1 = e^{{{slope_nom:.4f}}} - 1 = {g_all_years:.4f}$ or {g_all_years*100:.2f}%\n    ## $g_{{\\text{{{cutoff_year_min}-{cutoff_year_max}}}}} = e^m - 1 = e^{{{slope_nom2:.4f}}} - 1 = {g_subset:.4f}$ or {g_subset*100:.2f}%\n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "kqZH",
+      "name": "_",
+      "code": "",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "wAgl",
+      "name": "_",
+      "code": "discount_rate = mo.ui.number(value=football_discount_rate, step=0.0001)\ngrowth_rate = mo.ui.number(value=football_growth_rate, step=0.0001)\n\nperiods_slider = mo.ui.slider(5, 20, value=10)",
+      "code_hash": null,
+      "config": {
+        "column": 5,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "rEll",
+      "name": "_",
+      "code": "# Create individual series (i.e., columns)\ncapbudg_period = pl.Series(\"Period\", range(periods_slider.value + 1))\ncapbudg_cost2buy = pl.Series(\"Initial costs\", [-416000] + [0] * (periods_slider.value))\ncapbudg_sponsorships = pl.Series(\"Sponsorships\", [580000] + [0] * (periods_slider.value))\ncapbudg_revenues = pl.Series(\"Revenues\", [0.0] + list(np.linspace(414038, 1245000, periods_slider.value)))\ncapbudg_expenses = pl.Series(\"Expenses\", [0.0] + list(-701652 * (1.04 ** np.arange(periods_slider.value))))\n\n# Create dataframe from series (i.e., columns)\ncapbudg_df = pl.DataFrame([capbudg_period, capbudg_cost2buy, capbudg_sponsorships, capbudg_revenues, capbudg_expenses])\n\n# Net Cash Flows calculation\ncapbudg_df = capbudg_df.with_columns([\n    (pl.col(\"Initial costs\") + pl.col(\"Sponsorships\") + pl.col(\"Revenues\") + pl.col(\"Expenses\")).alias(\"Net Cash Flows\")\n])\n# To recoup calculation\ncapbudg_df = capbudg_df.with_columns([\n    pl.col(\"Net Cash Flows\").cum_sum().alias(\"To recoup\")\n])\n# PV Net Cash Flows calculation\ncapbudg_df = capbudg_df.with_columns([\n    (pl.col(\"Net Cash Flows\") / (1 + discount_rate.value) ** pl.col(\"Period\")).alias(\"PV Net Cash Flows\")\n])\n# PV to recoup calculation\ncapbudg_df = capbudg_df.with_columns([\n    pl.col(\"PV Net Cash Flows\").cum_sum().alias(\"PV to recoup\")\n])\n# capbudg_df\n\ncapbudg = (\n    GT(capbudg_df)\n    .tab_header(title=\"Capital Budgeting Analysis\")\n    .fmt_currency(columns=[\"Initial costs\", \"Sponsorships\", \"Revenues\", \"Expenses\", \"Net Cash Flows\", \"To recoup\", \"PV Net Cash Flows\", \"PV to recoup\"], decimals=0)\n)",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "dGlV",
+      "name": "_",
+      "code": "mo.vstack([\n    mo.md(\"# Capital Budgeting\"),\n    mo.hstack([mo.md(\"Periods\"), periods_slider, mo.md(f\"{periods_slider.value} periods\")], justify=\"start\", gap=1),\n    mo.vstack([\n        mo.hstack([mo.md(\"Discount Rate\"), discount_rate, mo.md(\"(original = 0.0935)\")], justify=\"start\", gap=1),\n        mo.hstack([mo.md(\"Growth Rate\"), growth_rate, mo.md(\"(original = 0.0400)\")], justify=\"start\", gap=1)\n    ]),\n    mo.hstack([\n        capbudg,\n        mo.vstack([\n            mo.md(\"### Capital Budgeting Metrics\"),\n            mo.md(f\"**NPV**: ${capbudg_df['PV Net Cash Flows'].sum():,.0f}\"),\n            mo.md(f\"**IRR**: {npf.irr(capbudg_df['Net Cash Flows']) * 100:.2f}%\"),\n            mo.md(f\"**MIRR**: {npf.mirr(capbudg_df['Net Cash Flows'], discount_rate.value, discount_rate.value) * 100:.2f}%\"),\n            mo.md(f\"**Breakeven:** 9+ years\")\n        ])\n    ])\n])",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": true
+      }
+    },
+    {
+      "id": "SdmI",
+      "name": "_",
+      "code": "sza_pivot = (\n    pl.from_pandas(sza)\n    .filter((pl.col(\"latitude\") == \"20\") & (pl.col(\"tst\") <= \"1200\"))\n    .select(pl.col(\"*\").exclude(\"latitude\"))\n    .drop_nulls()\n    .pivot(values=\"sza\", index=\"month\", on=\"tst\", sort_columns=True)\n)\n\n(\n    GT(sza_pivot, rowname_col=\"month\")\n    .data_color(\n        domain=[90, 0],\n        palette=[\"rebeccapurple\", \"white\", \"orange\"],\n        na_color=\"white\",\n    )\n    .tab_header(\n        title=\"Solar Zenith Angles from 05:30 to 12:00\",\n        subtitle=html(\"Average monthly values at latitude of 20&deg;N.\"),\n    )\n    .sub_missing(missing_text=\"\")\n)",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "disabled": false,
+        "hide_code": false
+      }
+    },
+    {
+      "id": "tzwC",
+      "name": "_",
+      "code": "",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    },
+    {
+      "id": "Kppz",
+      "name": "_",
+      "code": "mo.md(\"\"\"\n1. Too hot in June to watch games\n2. Sunday games\n3. Personal brand was at risk\n  * Wasn't sure she wanted to campaign like that in her \n\"\"\")",
+      "code_hash": null,
+      "config": {
+        "column": null,
+        "hide_code": false,
+        "disabled": false
+      }
+    }
+  ]
+}

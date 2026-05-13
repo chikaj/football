@@ -18,10 +18,11 @@ def _():
     import scipy as sp
     from scipy import stats
     import polars as pl
+    import polars.selectors as cs
     import plotly.express as px
     import altair as alt
     from great_tables import GT, md, html, vals, loc, style
-    from great_tables.data import islands
+    from great_tables.data import sza
 
     import numpy_financial as npf
     import yfinance as yf
@@ -36,43 +37,195 @@ def _():
         print("FRED API key not found ❌")
 
     fred = Fred(api_key=FRED_API_KEY)
-    return GT, fred, loc, mo, np, npf, pd, pl, px, stats, style, yf
+    return (
+        GT,
+        base64,
+        fred,
+        html,
+        loc,
+        mo,
+        np,
+        npf,
+        pd,
+        pl,
+        px,
+        stats,
+        style,
+        sza,
+        vals,
+    )
 
 
-@app.cell(hide_code=True)
+@app.cell
+def _():
+    return
+
+
+@app.cell(column=1, hide_code=True)
+def _(base64, mo):
+    # mo.image("img/Rosestadium.jfif", width="100%")
+
+    with open("img/Rosestadium.jfif", "rb") as f:
+        img_b64 = base64.b64encode(f.read()).decode()
+    mo.Html(f"""
+    <div style="position: relative; width: 100%;">
+        <img src="data:image/jpeg;base64,{img_b64}" style="width: 100%; display: block;">
+        <h1 style="position: absolute; top: 20px; left: 20px; padding: 16px 24px; margin: 0;
+           color: black; font-size: 3rem;
+           background: rgba(255, 255, 255, 0.4);
+           border-radius: 8px;">
+            Continental Football League
+        </h1>
+    </div>
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    # Continental Football League
+    ## A Tyler, Texas Franchise Possibility
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    1. Launches summer 2026 — an 8-team professional minor league playing a 6-week season from late May through early July, headquartered in Wheeling, West Virginia.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    2. Commissioner Mike Kelly — former Winnipeg Blue Bombers head coach with 45+ years of experience across NCAA, CFL, NFL, and XFL.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    3. "The Continental Shift" — a unique rule gimmick where the 4th quarter switches from American rules to CFL-style (3 downs, waggle motion, rouge). The league also uses the original CoFL's sudden-death overtime innovation.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    4. Fan/community ownership model — teams are community-owned with fan minority ownership stakes, registered with the SEC, modeled after the Green Bay Packers and CFL teams.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    5. 8 announced teams — North Division: Ohio Valley Ironmen, Cincinnati Dukes, Indianapolis Capitols, Norfolk Neptunes. South Division: Fort Worth Braves, San Antonio Toros, Tall City Black Gold, Texas Syndicate.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    # Continental Football League
+    ## The Financial Model
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    1. Crowdfunding. Regulation Crowdfunding (Reg CF) is an SEC rule allowing private companies to raise up to $5M/year from non-accredited investors through registered funding portals. The Continental Football Leagure uses WeFunder.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    2. Continental Football League teams will NOT be publicly traded. They are private companies that use the Reg CF exemption to sell shares to non-accredited ('fan') investors without doing a full IPO. There are no stock exchange listings, no ticker symbols, and no continuous SEC reporting.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    3. Teams will be SEC-registered and compliant (Wefunder will file a 'Form C' with the SEC), which means they will disclose the offering terms, risks, financials and use of their proceeds. This is a one-off filing for the fundraising round, not ongoing public registration.
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    4. Shares are illiquid. Fans buy in through the WeFunder campaign and there is no secondary market.
+    """)
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+@app.cell(column=2, hide_code=True)
 def _(mo, pl):
-    assumptions_df = pl.read_csv("data/assumptions.csv")
-    assumptions_df
+    assumptions_raw = pl.read_csv("data/assumptions.csv")
 
+    # mo.vstack([
+    #     mo.md("# Basic Assumptions"),
+    #     assumptions_raw
+    # ])
+
+    financial_assumption_raw   = assumptions_raw.slice(0, 2)   # Annual revenue growth, expense inflation
+    stadium_assumption_raw     = assumptions_raw.slice(2, 4)   # Home games, capacity, attendance
+    fees_assumption_raw        = assumptions_raw.slice(6, 2)   # Franchise fee, legal/accounting
+    population_assumption_raw  = assumptions_raw.slice(8, 3)   # 3 population figures
     mo.vstack([
         mo.md("# Basic Assumptions"),
-        assumptions_df
+        mo.hstack([financial_assumption_raw, stadium_assumption_raw], widths=[0.5, 0.5]),
+        mo.hstack([fees_assumption_raw, population_assumption_raw], widths=[0.5, 0.5]),
     ])
-    return (assumptions_df,)
+    return (
+        financial_assumption_raw,
+        population_assumption_raw,
+        stadium_assumption_raw,
+    )
 
 
 @app.cell(hide_code=True)
 def _(mo, pl):
-    stadium_rental_df = pl.read_csv("data/stadium_per_game_rental.csv")
+    stadium_rental_raw = pl.read_csv("data/stadium_per_game_rental.csv")
+    # stadium_rental_df = stadium_rental_df.with_columns(
+    #     Total = pl.col("Hours / Qty") * pl.col("Rate")
+    # )
 
     mo.vstack([
         mo.md("# Stadium Rental"),
-        stadium_rental_df
+        stadium_rental_raw
     ])
-    return (stadium_rental_df,)
+    return (stadium_rental_raw,)
 
 
 @app.cell(hide_code=True)
 def _(mo, pl):
-    startup_costs_df = pl.read_csv("data/startup1.csv")
-    expr_midpoint = ((pl.col("Low") + pl.col("High")) / 2).alias("Value")
-    startup_costs_df.insert_column(3, expr_midpoint)
+    startup_costs_raw = pl.read_csv("data/startup1.csv").with_columns(
+        Amount = (pl.col("Low") + pl.col("High")) / 2
+    ).drop("Low", "High")
 
     mo.vstack([
         mo.md("# Startup Costs"),
-        startup_costs_df
+        startup_costs_raw
     ])
-    return (startup_costs_df,)
+    return (startup_costs_raw,)
 
 
 @app.cell(hide_code=True)
@@ -171,18 +324,13 @@ def _():
 
 @app.cell(hide_code=True)
 def _(mo, pl):
-    startup_funding_df = pl.read_csv("data/startup_funding.csv")
-    # startup_funding = startup_funding.rename({"Source": "source"})
-    # startup_funding = startup_funding.rename({"Amount": "amount"})
-    # startup_funding = startup_funding.with_row_index("id", 1)
-    # startup_funding_expr_percent = (pl.col("Amount") / pl.col("Amount").sum()).alias("percent")
-    # startup_funding.insert_column(3, startup_funding_expr_percent)
+    startup_funding_raw = pl.read_csv("data/startup_funding.csv")
 
     mo.vstack([
         mo.md("# Startup Funding"),
-        startup_funding_df
+        startup_funding_raw
     ])
-    return (startup_funding_df,)
+    return (startup_funding_raw,)
 
 
 @app.cell(hide_code=True)
@@ -220,57 +368,61 @@ def _():
 
 @app.cell(hide_code=True)
 def _(mo, pl):
-    proforma_revenue_df = pl.read_csv("data/proforma-revenue.csv")
+    proforma_revenue_raw = pl.read_csv("data/proforma-revenue.csv")
+    proforma_revenue_raw = proforma_revenue_raw.filter(~pl.col("Line Item").str.contains("Concessions|Beer garden|Merchandise"))
 
     mo.vstack([
         mo.md("# Proforma Revenue"),
-        proforma_revenue_df
+        proforma_revenue_raw
     ])
-    return (proforma_revenue_df,)
+    return (proforma_revenue_raw,)
 
 
 @app.cell(hide_code=True)
 def _(mo, pl):
-    proforma_opex_df = pl.read_csv("data/proforma-opex.csv")
+    proforma_opex_raw = pl.read_csv("data/proforma-opex.csv")
 
     mo.vstack([
         mo.md("# Proforma Operating Expenses"),
-        proforma_opex_df
+        proforma_opex_raw
     ])
-    return (proforma_opex_df,)
+    return (proforma_opex_raw,)
 
 
 @app.cell(hide_code=True)
 def _(mo, pl):
-    proforma_gameday_df = pl.read_csv("data/proforma-game-day-expenses.csv")
+    proforma_gameday_raw = pl.read_csv("data/proforma-game-day-expenses.csv")
+    proforma_gameday_raw = proforma_gameday_raw.filter(~pl.col("Line Item").str.contains("Rose"))
 
     mo.vstack([
         mo.md("# Proforma Game Day Expenses"),
-        proforma_gameday_df
+        proforma_gameday_raw
     ])
-    return (proforma_gameday_df,)
+    return (proforma_gameday_raw,)
 
 
 @app.cell(hide_code=True)
 def _(mo, pl):
-    proforma_awayday_df = pl.read_csv("data/proforma-awaygame-expenses.csv")
+    proforma_awayday_raw = pl.read_csv("data/proforma-awaygame-expenses.csv")
 
     mo.vstack([
         mo.md("# Proforma Away Game Expenses"),
-        proforma_awayday_df
+        proforma_awayday_raw
     ])
-    return (proforma_awayday_df,)
+    return (proforma_awayday_raw,)
 
 
 @app.cell(hide_code=True)
 def _(mo, pl):
-    proforma_overhead_df = pl.read_csv("data/proforma-overhead.csv")
+    proforma_overhead_raw = pl.read_csv("data/proforma-overhead.csv")
+    proforma_overhead_raw = proforma_overhead_raw.filter(~pl.col("Line Item").str.contains("Annual CoFL|Payment processing|Contingency"))
+
 
     mo.vstack([
         mo.md("# Proforma Overhead Expenses"),
-        proforma_overhead_df
+        proforma_overhead_raw
     ])
-    return (proforma_overhead_df,)
+    return (proforma_overhead_raw,)
 
 
 @app.cell
@@ -278,37 +430,61 @@ def _():
     return
 
 
-@app.cell(column=1, hide_code=True)
+@app.cell(column=3, hide_code=True)
 def _(
-    assumptions_df,
+    financial_assumption_raw,
     mo,
-    proforma_awayday_df,
-    proforma_gameday_df,
-    proforma_opex_df,
-    proforma_overhead_df,
-    proforma_revenue_df,
-    stadium_rental_df,
-    startup_costs_df,
-    startup_funding_df,
+    population_assumption_raw,
+    proforma_awayday_raw,
+    proforma_gameday_raw,
+    proforma_opex_raw,
+    proforma_overhead_raw,
+    proforma_revenue_raw,
+    stadium_assumption_raw,
+    stadium_rental_raw,
+    startup_costs_raw,
+    startup_funding_raw,
 ):
+    ##### Cell A #####
+    # Cell A:          editor = mo.ui.data_editor(raw_df)
+    #                          ↓ (user edits)
+    # Cell B:          df = editor.value.with_columns(Total=...)
+    #                          ↓ (marimo re-runs this cell)
+    # Cell C:          GT(df)
+
     edit_switch = mo.ui.switch()
-    assumptions_editor = mo.ui.data_editor(assumptions_df)
-    stadium_editor = mo.ui.data_editor(stadium_rental_df)
-    startup_costs_editor = mo.ui.data_editor(startup_costs_df)
-    startup_funding_editor = mo.ui.data_editor(startup_funding_df)
-    proforma_revenue_editor = mo.ui.data_editor(proforma_revenue_df)
-    proforma_opex_editor = mo.ui.data_editor(proforma_opex_df)
-    proforma_gameday_editor = mo.ui.data_editor(proforma_gameday_df)
-    proforma_awayday_editor = mo.ui.data_editor(proforma_awayday_df)
-    proforma_overhead_editor = mo.ui.data_editor(proforma_overhead_df)
+
+    # Assumptions
+    # assumptions_editor = mo.ui.data_editor(assumptions_raw)
+    financial_assumption_editor = mo.ui.data_editor(financial_assumption_raw)
+    stadium_assumption_editor = mo.ui.data_editor(stadium_assumption_raw)
+    population_assumption_editor = mo.ui.data_editor(population_assumption_raw)
+
+    # Stadium Costs
+    stadium_editor = mo.ui.data_editor(stadium_rental_raw)
+
+    # Startup Costs
+    startup_costs_editor = mo.ui.data_editor(startup_costs_raw)
+
+    # Startup Funding
+    startup_funding_editor = mo.ui.data_editor(startup_funding_raw)
+
+    # Proforma
+    proforma_revenue_editor = mo.ui.data_editor(proforma_revenue_raw)
+    proforma_opex_editor = mo.ui.data_editor(proforma_opex_raw)
+    proforma_gameday_editor = mo.ui.data_editor(proforma_gameday_raw)
+    proforma_awayday_editor = mo.ui.data_editor(proforma_awayday_raw)
+    proforma_overhead_editor = mo.ui.data_editor(proforma_overhead_raw)
     return (
-        assumptions_editor,
         edit_switch,
+        financial_assumption_editor,
+        population_assumption_editor,
         proforma_awayday_editor,
         proforma_gameday_editor,
         proforma_opex_editor,
         proforma_overhead_editor,
         proforma_revenue_editor,
+        stadium_assumption_editor,
         stadium_editor,
         startup_costs_editor,
         startup_funding_editor,
@@ -317,78 +493,222 @@ def _(
 
 @app.cell(hide_code=True)
 def _(
-    GT,
-    assumptions_editor,
-    edit_switch,
-    loc,
-    mo,
+    financial_assumption_editor,
+    pl,
+    population_assumption_editor,
     proforma_awayday_editor,
     proforma_gameday_editor,
     proforma_opex_editor,
     proforma_overhead_editor,
     proforma_revenue_editor,
+    stadium_assumption_editor,
     stadium_editor,
     startup_costs_editor,
     startup_funding_editor,
-    style,
 ):
+    ##### Cell B - this is where I add computed columns!! #####
+    # Cell A:          editor = mo.ui.data_editor(raw_df)
+    #                          ↓ (user edits)
+    # Cell B:          df = editor.value.with_columns(Total=...)
+    #                          ↓ (marimo re-runs this cell)
+    # Cell C:          GT(df)
+
+    financial_assumption_df = financial_assumption_editor.value
+    stadium_assumption_df = stadium_assumption_editor.value
+    population_assumption_df = population_assumption_editor.value
+
+    # Stadium Costs
+    stadium_df = stadium_editor.value.with_columns(
+         Total=pl.col("Hours / Qty") * pl.col("Rate")
+    )
+
+    # Startup Costs
+    startup_costs_df = startup_costs_editor.value
+
+    # Startup Funding
+    startup_funding_df = startup_funding_editor.value
+
+    # Proforma
+    proforma_revenue_df = proforma_revenue_editor.value.with_columns(
+        Amount = pl.col("Qty/Seats") * pl.col("$/Unit") * pl.col("# Games")
+    )
+    proforma_opex_df = proforma_opex_editor.value.with_columns(
+        Amount = pl.col("Units") * pl.col("Cost") * pl.col("Quantity")
+    )
+    proforma_gameday_df = proforma_gameday_editor.value.with_columns(
+        Amount = pl.col("Games/Days") * pl.col("Per Game") * pl.col("People")
+    )
+    proforma_awayday_df = proforma_awayday_editor.value.with_columns(
+        Amount = pl.col("Qty") * pl.col("$ per") * pl.col("# Games")
+    )
+    proforma_overhead_df = proforma_overhead_editor.value.with_columns(
+        Amount = pl.col("Qty") * pl.col("Rate") * pl.col("Periods")
+    )
+    return (
+        financial_assumption_df,
+        population_assumption_df,
+        proforma_awayday_df,
+        proforma_gameday_df,
+        proforma_opex_df,
+        proforma_overhead_df,
+        proforma_revenue_df,
+        stadium_assumption_df,
+        stadium_df,
+        startup_costs_df,
+        startup_funding_df,
+    )
+
+
+@app.cell
+def _(
+    GT,
+    edit_switch,
+    financial_assumption_df,
+    financial_assumption_editor,
+    loc,
+    mo,
+    pl,
+    population_assumption_df,
+    proforma_awayday_df,
+    proforma_awayday_editor,
+    proforma_gameday_df,
+    proforma_gameday_editor,
+    proforma_opex_df,
+    proforma_opex_editor,
+    proforma_overhead_df,
+    proforma_overhead_editor,
+    proforma_revenue_df,
+    proforma_revenue_editor,
+    stadium_assumption_df,
+    stadium_assumption_editor,
+    stadium_df,
+    stadium_editor,
+    startup_costs_df,
+    startup_costs_editor,
+    startup_funding_df,
+    startup_funding_editor,
+    style,
+    vals,
+):
+    ##### Cell C #####
+
     if edit_switch.value:
         output = mo.ui.tabs({
-            "Assumptions": assumptions_editor,
+            "Assumptions": mo.vstack([
+                mo.vstack([mo.md(""" Projected Growth"""), financial_assumption_editor]),
+                mo.vstack([mo.md(""" Stadium Usage"""), stadium_assumption_editor]),
+                mo.vstack([mo.md(""" Local Population"""), stadium_assumption_editor]),
+            ]),
             "Stadium Rental": stadium_editor,
             "Startup Costs": startup_costs_editor,
             "Funding Sources": startup_funding_editor,
-            "Year 1 Proforma": mo.vstack([
+            "Proforma": mo.vstack([
                 mo.vstack([mo.md("### Revenue"), proforma_revenue_editor]),
                 mo.vstack([mo.md("### Operating Expenses"), proforma_opex_editor]),
                 mo.vstack([mo.md("### Game Day Expenses"), proforma_gameday_editor]),
                 mo.vstack([mo.md("### Away Game Expenses"), proforma_awayday_editor]),
                 mo.vstack([mo.md("### Overhead Expenses"), proforma_overhead_editor]),
             ]),
-            "10-Year Forecast": "nada",
-            "Analysis Table": "nada"
-        })
+            # "10-Year Forecast": "nada",
+            # "Analysis Table": "nada"
+        }).center()
     else:
         output = mo.ui.tabs({
-            "Assumptions": (
-                GT(assumptions_editor.value)
-                .tab_header(title="Basic Assumptions")
-                .fmt_percent(columns=["Value"], rows=[0, 1])
-                .fmt_integer(columns=["Value"], rows=[2, 3])
-                .fmt_currency(columns=["Value"], rows=[4, 5, 6, 7, 8, 9, 10], decimals=0)
-            ),
+            "Assumptions": mo.vstack([
+                GT(financial_assumption_df, rowname_col="Assumption")
+                    .fmt_percent("Value"),
+                GT(stadium_assumption_df, rowname_col="Assumption")
+                    .fmt_integer("Value"),
+                GT(population_assumption_df, rowname_col="Assumption")
+                    .fmt_integer("Value"),
+            ]),
             "Stadium Rental": (
-                GT(stadium_editor.value)
+                GT(stadium_df, rowname_col="Line Item")
                 .tab_header(title="Stadium Rental")
+                .fmt_currency(["Rate","Total"])
+                .grand_summary_rows(
+                    fns={
+                        "Total": pl.sum("Total")
+                    },
+                    fmt=vals.fmt_currency
+                )
             ),
             "Startup Costs": (
-                GT(startup_costs_editor.value)
+                GT(startup_costs_df, rowname_col="Cost Category")
                 .tab_header(title="Startup Costs")
-                .cols_hide(columns=["Low", "High"])
-                .fmt_currency(columns=["Value"], decimals=0)
+                .fmt_currency(columns=["Amount"], decimals=0)
+                .grand_summary_rows(
+                    fns={
+                        "Total": pl.sum("Amount")
+                    },
+                    fmt = vals.fmt_currency
+                )
             ),
             "Funding Sources": (
-                GT(startup_funding_editor.value)
+                GT(startup_funding_df, rowname_col="Source")
                 .tab_header(title="Startup Funding")
+                .fmt_currency("Amount")
+                .grand_summary_rows(
+                    fns={
+                        "Total": pl.sum("Amount")
+                    },
+                    fmt=vals.fmt_currency
+                )
             ),
-            "Year 1 Proforma": mo.vstack([
-                GT(proforma_revenue_editor.value)
+            "Proforma": mo.vstack([
+                GT(proforma_revenue_df, rowname_col="Line Item")
                 .tab_header(title="Revenue")
-                .tab_style(style.fill("green"), loc.header()),
-                GT(proforma_opex_editor.value)
+                .tab_style(style.fill("green"), loc.header())
+                .fmt_currency(["$/Unit", "Amount"])
+                .fmt_integer("Qty/Seats")
+                .grand_summary_rows(
+                    fns={
+                        "Total": pl.sum("Amount")
+                    },
+                    fmt=vals.fmt_currency
+                ),
+                GT(proforma_opex_df, rowname_col="Line Item")
                 .tab_header(title="Operating Expenses")
-                .tab_style(style.fill("red"), loc.header()),
-                GT(proforma_gameday_editor.value)
+                .tab_style(style.fill("red"), loc.header())
+                .fmt_currency(["Cost", "Amount"])
+                .grand_summary_rows(
+                    fns={
+                        "Total": pl.sum("Amount")
+                    },
+                    fmt=vals.fmt_currency
+                ),
+                GT(proforma_gameday_df, rowname_col="Line Item")
                 .tab_header(title="Game Day Expenses")
-                .tab_style(style.fill("red"), loc.header()),
-                GT(proforma_awayday_editor.value)
+                .tab_style(style.fill("red"), loc.header())
+                    .fmt_currency(["Per Game", "Amount"])
+                .grand_summary_rows(
+                    fns={
+                        "Total": pl.sum("Amount")
+                    },
+                    fmt=vals.fmt_currency
+                ),
+                GT(proforma_awayday_df, rowname_col="Line Item")
                 .tab_header(title="Away Game Expenses")
-                .tab_style(style.fill("red"), loc.header()),
-                GT(proforma_overhead_editor.value)
+                .tab_style(style.fill("red"), loc.header())
+                    .fmt_currency(["$ per", "Amount"])
+                .grand_summary_rows(
+                    fns={
+                        "Total": pl.sum("Amount")
+                    },
+                    fmt=vals.fmt_currency
+                ),
+                GT(proforma_overhead_df, rowname_col="Line Item")
                 .tab_header(title="Overhead Expenses")
                 .tab_style(style.fill("red"), loc.header())
+                .fmt_currency(["Rate", "Amount"])
+                .grand_summary_rows(
+                    fns={
+                        "Total": pl.sum("Amount")
+                    },
+                    fmt=vals.fmt_currency
+                )
             ])
-        })
+        }).center()
 
 
     mo.vstack([
@@ -400,26 +720,96 @@ def _(
 
 
 @app.cell
+def _(
+    pl,
+    proforma_awayday_df,
+    proforma_gameday_df,
+    proforma_opex_df,
+    proforma_overhead_df,
+    proforma_revenue_df,
+    stadium_assumption_df,
+    stadium_df,
+    startup_costs_df,
+):
+    games_per_season = 3
+    attendance = stadium_assumption_df[3, 1]
+    franchise_fee = startup_costs_df[0, 1]
+
+    concessions = attendance * 0.5 * 10 * 3
+    beer_garden = attendance * 0.1 * 25 * 3
+    merchandise = attendance * 0.2 * 20 * 3
+    revenue_y1 = proforma_revenue_df["Amount"].sum() + concessions + beer_garden + merchandise
+
+    stadium_rental_y1 = stadium_df["Total"].sum() * games_per_season
+    opex_y1 = proforma_opex_df["Amount"].sum()
+    game_day_y1 = proforma_gameday_df["Amount"].sum() + stadium_rental_y1
+    away_day_y1 = proforma_awayday_df["Amount"].sum()
+
+    contingency = (game_day_y1 + away_day_y1 + opex_y1) * 0.05
+    payment_fees = (proforma_revenue_df[:4].select(pl.col("Amount").sum()).item() + concessions * 3 + beer_garden * 3 + merchandise * 3) * 0.03
+    overhead_y1 = proforma_overhead_df["Amount"].sum() + franchise_fee + contingency + payment_fees
+    return (
+        away_day_y1,
+        game_day_y1,
+        merchandise,
+        opex_y1,
+        overhead_y1,
+        revenue_y1,
+    )
+
+
+@app.cell
+def _(merchandise):
+    merchandise
+    return
+
+
+@app.cell
+def _(proforma_revenue_df):
+    w = proforma_revenue_df
+    w
+    return
+
+
+@app.cell
+def _(away_day_y1, game_day_y1, opex_y1, overhead_y1, pl, revenue_y1):
+    annual_total = pl.DataFrame([
+        revenue_y1,
+        opex_y1,
+        game_day_y1,
+        away_day_y1,
+        overhead_y1
+    ])
+    annual_total
+    return
+
+
+@app.cell
 def _():
     return
 
 
-@app.cell(column=2, hide_code=True)
+@app.cell(column=4)
 def _(mo):
-    mo.md(r"""
-    # Discount Rate Calculation
-
-    ## $\beta$ Calculation
+    mo.md("""
+    # Discount and Growth Rate Calculations
     """)
     return
 
 
 @app.cell(hide_code=True)
-def _(yf):
-    tickers = ["SPY", "TKO", "FWONA", "MANU"]
-    data = yf.download(tickers, start="2006-01-01", interval="1mo")
-    returns = data["Close"].pct_change().dropna()
-    returns
+def _(mo, pd):
+    # Uncomment to use yfinance directly
+    # tickers = ["SPY", "TKO", "FWONA", "MANU"]
+    # data = yf.download(tickers, start="2006-01-01", interval="1mo")
+    # returns = data["Close"].pct_change().dropna()
+
+    returns = pd.read_parquet("data/yfcomparables.parquet")
+
+    mo.vstack([
+        mo.md(rf"## $\beta$ Calculation"),
+        returns
+    ])
     return (returns,)
 
 
@@ -481,40 +871,47 @@ def _(beta, fred, mo):
 
     football_discount_rate = rfr + beta * kroll_erp
 
-
-    mo.md(rf"""
-        # Total discount rate
-
-        ### Risk free rate (higher of {kroll_rf} or the spot treasury yield[^1^](https://www.kroll.com/en/reports/cost-of-capital/recommended-us-equity-risk-premium-and-corresponding-risk-free-rates)): {rfr:.4f} 
-        ### Average Beta: {beta:.4f}
-        ### Kroll Equity Risk Premium: {kroll_erp:.4f}
-        ---
-
-        ### $r = R_f + \beta \times ERP$
-        ### $r = {rfr:.4f} + {beta:.4f} * {kroll_erp:.4f}$
-        ### $r = {football_discount_rate:.4f}$ or {football_discount_rate*100:.2f}%
-    """)
+    mo.vstack([
+        mo.md("""
+            ## Capital Asset Pricing Model: total discount rate
+        """),
+        mo.md(rf"""
+            ---
+            * Risk free rate (higher of {kroll_rf} or the spot treasury yield[^1^](https://www.kroll.com/en/reports/cost-of-capital/recommended-us-equity-risk-premium-and-corresponding-risk-free-rates)): {rfr:.4f}
+            * Average Beta: {beta:.4f}
+            * Kroll Equity Risk Premium: {kroll_erp:.4f}
+        """),
+        mo.md(rf"""
+            ---
+            ### $r = R_f + \beta \times ERP$
+            ### $r = {rfr:.4f} + {beta:.4f} * {kroll_erp:.4f}$
+            ### $r = {football_discount_rate:.4f}$ or {football_discount_rate*100:.2f}%
+        """)
+    ])
     return (football_discount_rate,)
 
 
 @app.cell
-def _(mo):
-    mo.md("""
-    # Growth Rate
-    """)
+def _():
+    # Growth Rate calculations
     return
 
 
 @app.cell(hide_code=True)
-def _(fred, pd):
-    gdp_nom = fred.get_series('GDP')
-    gdp_real = fred.get_series('GDPC1')
-    gdp = pd.DataFrame({
-        'Nominal GDP': gdp_nom,
-        'Real GDP': gdp_real
-    }).resample('YE').last().dropna()
-    gdp.index = gdp.index.year
-    gdp.index.name = 'Year'
+def _(pd):
+    # Uncomment to use FRED api directly
+    # gdp_nom = fred.get_series('GDP')
+    # gdp_real = fred.get_series('GDPC1')
+    # gdp = pd.DataFrame({
+    #     'Nominal GDP': gdp_nom,
+    #     'Real GDP': gdp_real
+    # }).resample('YE').last().dropna()
+    # gdp.index = gdp.index.year
+    # gdp.index.name = 'Year'
+
+    # Comment the following line if using the FRED api directly
+    gdp = pd.read_parquet("data/fredgdp.parquet")
+
     gdp
     return (gdp,)
 
@@ -526,11 +923,15 @@ def _(gdp, mo, px):
         title='Annual GDP (Levels)',
         labels={'value': 'Billions of $', 'index': 'Year', 'variable': ''},
     )
-    mo.ui.plotly(fig1)
+
+    mo.vstack([
+        mo.md("## Growth Rate Calculation"),
+        mo.ui.plotly(fig1)
+    ])
     return
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(gdp, mo, np, pd, px, stats):
     gdp['ln(Nominal GDP)'] = np.log(gdp['Nominal GDP'])
     gdp['ln(Real GDP)'] = np.log(gdp['Real GDP'])
@@ -595,10 +996,10 @@ def _(gdp, mo, np, pd, px, stats):
         mo.ui.plotly(fig2),
         mo.md('### Regression Coefficients (Log GDP)'),
         mo.ui.table(coeff_gdp_df),
-        mo.md(f'### Regression Coefficients (Log GDP) since {cutoff_year_max}'),
+        mo.md(f'### Regression Coefficients (Log GDP) {cutoff_year_min} to {cutoff_year_max}'),
         mo.ui.table(coeff_gdp2_df),
     ])
-    return (coeff_gdp_df,)
+    return coeff_gdp2_df, coeff_gdp_df, cutoff_year_max, cutoff_year_min
 
 
 @app.cell
@@ -607,22 +1008,24 @@ def _():
 
 
 @app.cell(hide_code=True)
-def _(coeff_gdp_df, mo, np):
+def _(coeff_gdp2_df, coeff_gdp_df, cutoff_year_max, cutoff_year_min, mo, np):
     slope_nom = coeff_gdp_df.loc[coeff_gdp_df['Measure'] == 'ln(Nominal GDP)', 'Slope'].iloc[0]
     intercept_nom = coeff_gdp_df.loc[coeff_gdp_df['Measure'] == 'ln(Nominal GDP)', 'Intercept'].iloc[0]
-    slope_real = coeff_gdp_df.loc[coeff_gdp_df['Measure'] == 'ln(Real GDP)', 'Slope'].iloc[0]
-    intercept_real = coeff_gdp_df.loc[coeff_gdp_df['Measure'] == 'ln(Real GDP)', 'Intercept'].iloc[0]
+    slope_nom2 = coeff_gdp2_df.loc[coeff_gdp2_df['Measure'] == 'ln(Nominal GDP)', 'Slope'].iloc[0]
+    intercept_nom2 = coeff_gdp2_df.loc[coeff_gdp2_df['Measure'] == 'ln(Nominal GDP)', 'Intercept'].iloc[0]
 
-    football_growth_rate = np.exp(slope_nom) - 1
+
+    g_all_years = np.exp(slope_nom) - 1
+    g_subset = np.exp(slope_nom2) - 1
+    football_growth_rate = 0.04
 
     mo.md(rf"""
-        ## Regression Equations
-        #### $ln(Nominal GDP) = {intercept_nom} + {slope_nom} * Year$
-        #### $ln(Real GDP) = {intercept_real} + {slope_real} * Year$
+        ### Regression Equation
+        #### $ln(GDP) = b + m (Year)$
         ---
-        ## Growth Rate Calculations
-        ### $g_{{\text{{nominal}}}} = e^m - 1 = e^{{{slope_nom:.4f}}} - 1 = {football_growth_rate:.4f}$ or {football_growth_rate*100:.2f}%
-        ### $g_{{\text{{real}}}} = e^m - 1 = e^{{{slope_real:.4f}}} - 1 = {(np.exp(slope_real) - 1):.4f}$ or {(np.exp(slope_real) - 1)*100:.2f}%
+        ## Nominal Growth Rate Calculations
+        ## $g_{{\text{{all years}}}} = e^m - 1 = e^{{{slope_nom:.4f}}} - 1 = {g_all_years:.4f}$ or {g_all_years*100:.2f}%
+        ## $g_{{\text{{{cutoff_year_min}-{cutoff_year_max}}}}} = e^m - 1 = e^{{{slope_nom2:.4f}}} - 1 = {g_subset:.4f}$ or {g_subset*100:.2f}%
     """)
     return (football_growth_rate,)
 
@@ -632,7 +1035,7 @@ def _():
     return
 
 
-@app.cell(column=3, hide_code=True)
+@app.cell(column=5, hide_code=True)
 def _(football_discount_rate, football_growth_rate, mo):
     discount_rate = mo.ui.number(value=football_discount_rate, step=0.0001)
     growth_rate = mo.ui.number(value=football_growth_rate, step=0.0001)
@@ -643,13 +1046,16 @@ def _(football_discount_rate, football_growth_rate, mo):
 
 @app.cell(hide_code=True)
 def _(GT, discount_rate, np, periods_slider, pl):
+    # Create individual series (i.e., columns)
     capbudg_period = pl.Series("Period", range(periods_slider.value + 1))
     capbudg_cost2buy = pl.Series("Initial costs", [-416000] + [0] * (periods_slider.value))
     capbudg_sponsorships = pl.Series("Sponsorships", [580000] + [0] * (periods_slider.value))
     capbudg_revenues = pl.Series("Revenues", [0.0] + list(np.linspace(414038, 1245000, periods_slider.value)))
     capbudg_expenses = pl.Series("Expenses", [0.0] + list(-701652 * (1.04 ** np.arange(periods_slider.value))))
 
+    # Create dataframe from series (i.e., columns)
     capbudg_df = pl.DataFrame([capbudg_period, capbudg_cost2buy, capbudg_sponsorships, capbudg_revenues, capbudg_expenses])
+
     # Net Cash Flows calculation
     capbudg_df = capbudg_df.with_columns([
         (pl.col("Initial costs") + pl.col("Sponsorships") + pl.col("Revenues") + pl.col("Expenses")).alias("Net Cash Flows")
@@ -666,7 +1072,7 @@ def _(GT, discount_rate, np, periods_slider, pl):
     capbudg_df = capbudg_df.with_columns([
         pl.col("PV Net Cash Flows").cum_sum().alias("PV to recoup")
     ])
-    capbudg_df
+    # capbudg_df
 
     capbudg = (
         GT(capbudg_df)
@@ -691,7 +1097,7 @@ def _(
         mo.hstack([mo.md("Periods"), periods_slider, mo.md(f"{periods_slider.value} periods")], justify="start", gap=1),
         mo.vstack([
             mo.hstack([mo.md("Discount Rate"), discount_rate, mo.md("(original = 0.0935)")], justify="start", gap=1),
-            mo.hstack([mo.md("Growth Rate"), growth_rate, mo.md("(original = 0.0659)")], justify="start", gap=1)
+            mo.hstack([mo.md("Growth Rate"), growth_rate, mo.md("(original = 0.0400)")], justify="start", gap=1)
         ]),
         mo.hstack([
             capbudg,
@@ -708,7 +1114,44 @@ def _(
 
 
 @app.cell
+def _(GT, html, pl, sza):
+    sza_pivot = (
+        pl.from_pandas(sza)
+        .filter((pl.col("latitude") == "20") & (pl.col("tst") <= "1200"))
+        .select(pl.col("*").exclude("latitude"))
+        .drop_nulls()
+        .pivot(values="sza", index="month", on="tst", sort_columns=True)
+    )
+
+    (
+        GT(sza_pivot, rowname_col="month")
+        .data_color(
+            domain=[90, 0],
+            palette=["rebeccapurple", "white", "orange"],
+            na_color="white",
+        )
+        .tab_header(
+            title="Solar Zenith Angles from 05:30 to 12:00",
+            subtitle=html("Average monthly values at latitude of 20&deg;N."),
+        )
+        .sub_missing(missing_text="")
+    )
+    return
+
+
+@app.cell
 def _():
+    return
+
+
+@app.cell(column=6)
+def _(mo):
+    mo.md("""
+    1. Too hot in June to watch games
+    2. Sunday games
+    3. Personal brand was at risk
+      * Wasn't sure she wanted to campaign like that in her
+    """)
     return
 
 
