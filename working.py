@@ -1339,54 +1339,56 @@ def _(img_b64, mo):
 
 @app.cell
 def _(mo):
-    mo.hstack([
-        mo.md("# Yes"),
-        mo.md("# No"),
-    ], justify="space-around")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.hstack([
-        mo.md("1. With Aggressive Growth"),
-        mo.md("1. Yeah, but only with aggressive growth"),
-    ], justify="space-around")
-    return
-
-
-@app.cell
-def _(mo):
-    mo.hstack([
-        mo.md("2. With Aggressive Growth"),
-        mo.md("2. Yeah, but only with aggressive growth"),
-    ], justify="space-around")
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    1. Only with aggressive growth, perhaps beyond what is realistic.
-    2. Requires an increase in marketing budget. Market, market market!!
-    3. Community is ripe for this. They love football and Anne loves her community
-    4. This isn't just about making money--it is a community effort
-    5. The community is growing!
-    """)
+    mo.md("# Yes?").center()
     return
 
 
 @app.cell
 def _(mo):
     mo.md("""
-    1. Community owned is great!
-    2. The timing is off (First communication in January)
-    3. Too hot in June to watch games
-    4. Sunday games
-    5. Personal brand was at risk
-      * Wasn't sure she wanted to campaign like that in her
-    4. No control of other cities in the league--increased risk
-    """)
+        1. Community owned is great❗
+        2. Tyler is growing❗
+        3. Tyler is ripe for this. They love football and **Anne** loves her community❗
+        4. It will happen with aggressive growth❗
+        5. It will require an increase in the marketing budget. Market, market, market❗
+        6. It will be risky❗
+        7. But this isn't just about making money--it's about community❗
+    """).center()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("# Maybe Not?").center()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+        1. The timing is off (First communication in January!)👎
+        2. Too hot in June to watch games👎
+        3. Sunday games👎
+        4. Personal brand was at risk👎
+        5. Wasn't sure she wanted to campaign like that in her👎
+        6. No control of other cities in the league--increased risk👎
+    """).center()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+        # What do you say?
+    """).center()
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+        ### Questions?
+    """).center()
     return
 
 
