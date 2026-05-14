@@ -37,22 +37,7 @@ def _():
         print("FRED API key not found ❌")
 
     fred = Fred(api_key=FRED_API_KEY)
-    return (
-        GT,
-        base64,
-        html,
-        loc,
-        mo,
-        np,
-        npf,
-        pd,
-        pl,
-        px,
-        stats,
-        style,
-        sza,
-        vals,
-    )
+    return GT, base64, loc, mo, np, npf, pd, pl, px, stats, style, vals
 
 
 @app.cell
@@ -1234,43 +1219,110 @@ def _(
     return
 
 
-@app.cell
-def _(GT, html, mo, pl, scenario_dropdown, sza):
-    sza_pivot = (
-        pl.from_pandas(sza)
-        .filter((pl.col("latitude") == "20") & (pl.col("tst") <= "1200"))
-        .select(pl.col("*").exclude("latitude"))
-        .drop_nulls()
-        .pivot(values="sza", index="month", on="tst", sort_columns=True)
-    )
+@app.cell(hide_code=True)
+def _(
+    GT,
+    initial_costs_y1,
+    mo,
+    np,
+    pl,
+    revenue_y1,
+    scenario_dropdown,
+    sponsorships_y1,
+    total_costs_y1,
+):
+    def compute_npv(periods, dr):
+        if scenario_dropdown.value == 1:
+            rev_growth = 1.10
+            exp_growth = 1.04
+            revs = [0.0] + list(revenue_y1 * (rev_growth ** np.arange(periods)))
+            exps = [0.0] + list(total_costs_y1 * (exp_growth ** np.arange(periods)))
+        elif scenario_dropdown.value == 2:
+            rev_growth = 1.15
+            exp_growth = 1.06
+            revs = [0.0] + list(revenue_y1 * (rev_growth ** np.arange(periods)))
+            exps = [0.0] + list(total_costs_y1 * (exp_growth ** np.arange(periods)))
+        else:  # scenario 3
+            ramp_end = revenue_y1 + 548220
+            revs = [0.0]
+            for i in range(1, periods + 1):
+                if i <= 1:
+                    revs.append(revenue_y1)
+                elif i < 5:
+                    fraction = (i - 1) / 4
+                    revs.append(revenue_y1 + 548220 * fraction + 10500 * (1.1 ** (i - 2)))
+                elif i == 5:
+                    revs.append(ramp_end + 10500 * (1.1 ** 3))
+                else:
+                    revs.append(revs[5] * (1.10 ** (i - 5)))
+            base = total_costs_y1 - 26000
+            exps = [0.0] + [base * (1.06 ** i) for i in range(periods)]
+        init = [initial_costs_y1] + [0] * periods
+        spons = [sponsorships_y1] + [0] * periods
+        ncf = [init[i] + spons[i] + revs[i] + exps[i] for i in range(periods + 1)]
+        pv = [ncf[i] / (1 + dr) ** i for i in range(periods + 1)]
+        return sum(pv)
+    period_vals = list(range(5, 16))
+    dr_vals = [0.06 + 0.01 * i for i in range(11)]
+    rows_data = []
+    for p in period_vals:
+        r = {"Periods": p}
+        for dr in dr_vals:
+            r[f"{dr*100:.0f}%"] = round(compute_npv(p, dr))
+        rows_data.append(r)
+    sensitivity = pl.DataFrame(rows_data)
+    # sensitivity
 
-    two_way = (
-        GT(sza_pivot, rowname_col="month")
-        .data_color(
-            domain=[90, 0],
-            palette=["rebeccapurple", "white", "orange"],
+    # Display cell (new cell, depends on GT, mo, sensitivity):
+    dr_cols = [f"{dr*100:.0f}%" for dr in [0.06 + 0.01 * i for i in range(11)]]
+    sensitivity_display = GT(sensitivity, rowname_col="Periods").fmt_number(columns=dr_cols, decimals=0)
+    for dr_col in dr_cols:
+        abs_max = max(abs(sensitivity[dr_col].min()), abs(sensitivity[dr_col].max()))
+        sensitivity_display = sensitivity_display.data_color(
+            columns=[dr_col],
+            domain=[-abs_max, abs_max],
+            palette=["darkred", "white", "green"],
             na_color="white",
         )
-        .tab_header(
-            title="Solar Zenith Angles from 05:30 to 12:00",
-            subtitle=html("Average monthly values at latitude of 20&deg;N."),
-        )
-        .sub_missing(missing_text="")
-    )
+    sensitivity_display = sensitivity_display.tab_header(title="Periods × Discount Rate")
+    # sensitivity_display
 
     mo.vstack([
-        mo.md("# Sensitivity Analysis with a two-way table"),
-        scenario_dropdown,
-        two_way
+        mo.md("# NPV Sensitivity Analysis").center(),
+        sensitivity_display
     ])
     return
 
 
-@app.cell
-def _(growth_rate, mo):
+@app.cell(hide_code=True)
+def _(capbudg_df, discount_rate, growth_rate, mo, periods_slider):
+    ncf = capbudg_df["Net Cash Flows"]
+    fcf_list = [round(ncf[yr]) for yr in range(1, periods_slider.value + 1)]
+    pv_list = [round(ncf[yr] / (1 + discount_rate.value) ** yr) for yr in range(1, periods_slider.value + 1)]
+    tv = round(ncf[periods_slider.value] * (1 + growth_rate.value) / (discount_rate.value - growth_rate.value))
+    pv_tv = round(tv / (1 + discount_rate.value) ** periods_slider.value)
+    ev = sum(pv_list) + pv_tv
+
     mo.vstack([
         mo.md("# Discounted Cash Flow Model"),
-        mo.hstack([mo.md("Growth Rate"), growth_rate, mo.md("(original = 0.0400)")], justify="start", gap=1)
+        mo.hstack([
+            mo.md("Discount Rate"),
+            discount_rate
+        ], justify="start", gap=1),
+        mo.hstack([
+            mo.md("Growth Rate"),
+            growth_rate
+        ], justify="start", gap=1),
+        mo.hstack([
+            mo.md("---"),
+            mo.md("$$PV_t = \\frac{{FCF_t}}{{(1 + r)^t}}$$"),
+            mo.md("$$TV = \\frac{{FCF_n \\times (1 + g)}}{{r - g}}$$"),
+            mo.md("$$EV = \\sum_{{t=1}}^{{n}} PV_t + \\frac{{TV}}{{(1 + r)^n}}$$")
+        ]),
+        mo.hstack([
+            mo.md("### Enterprise Value"),
+            mo.md(f"**${ev:,.0f}**")
+        ], justify="start", gap=1)
     ])
     return
 
