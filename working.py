@@ -40,7 +40,6 @@ def _():
     return (
         GT,
         base64,
-        fred,
         html,
         loc,
         mo,
@@ -61,7 +60,13 @@ def _():
     return
 
 
-@app.cell(column=1, hide_code=True)
+@app.cell(column=1)
+def _(mo):
+    mo.iframe("https://www.coflfootball.com/home", width="100%", height="700px")
+    return
+
+
+@app.cell(hide_code=True)
 def _(base64, mo):
     # mo.image("img/Rosestadium.jfif", width="100%")
 
@@ -133,8 +138,17 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md("""
-    # Continental Football League
-    ## The Financial Model
+    # Is the CoFL worth it for Tyler, Texas?
+    ## The CoFL Financial Model
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    # Is the CoFL worth it for Anne Rhodus?
+    ## The CoFL Financial Model
     """)
     return
 
@@ -142,7 +156,7 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md("""
-    1. Crowdfunding. Regulation Crowdfunding (Reg CF) is an SEC rule allowing private companies to raise up to $5M/year from non-accredited investors through registered funding portals. The Continental Football Leagure uses WeFunder.
+    1. Regulation Crowdfunding (Reg CF) is an SEC rule allowing private companies to raise up to $5M/year from non-accredited investors through registered funding portals. The Continental Football League uses WeFunder.
     """)
     return
 
@@ -158,7 +172,7 @@ def _(mo):
 @app.cell
 def _(mo):
     mo.md("""
-    3. Teams will be SEC-registered and compliant (Wefunder will file a 'Form C' with the SEC), which means they will disclose the offering terms, risks, financials and use of their proceeds. This is a one-off filing for the fundraising round, not ongoing public registration.
+    3. Teams will be SEC-registered and compliant (Wefunder will file a 'Form C' with the SEC), which means they will disclose the offering terms, risks, financials and use of their proceeds. This is a one-off filing for the fundraising round, not ongoing public registration. There can be a fundraising round each year.
     """)
     return
 
@@ -432,6 +446,79 @@ def _():
 
 @app.cell(column=3, hide_code=True)
 def _(
+    pl,
+    proforma_awayday_df,
+    proforma_gameday_df,
+    proforma_opex_df,
+    proforma_overhead_df,
+    proforma_revenue_df,
+    stadium_assumption_df,
+    stadium_df,
+    startup_costs_df,
+):
+    games_per_season = 3
+    attendance = stadium_assumption_df[3, 1]
+
+    # Additional expense
+    franchise_fee = startup_costs_df[0, 1]
+
+    # Additional revenue
+    concessions = attendance * 0.5 * 10 * 3
+    beer_garden = attendance * 0.1 * 25 * 3
+    merchandise = attendance * 0.2 * 20 * 3
+
+    game_day_revenue_df = pl.DataFrame({
+        "Category": ["Concessions", "Beer Garden", "Merchandise"],
+        "Amount": [concessions, beer_garden, merchandise]
+    })
+
+    revenue_y1 = proforma_revenue_df["Amount"].sum() + game_day_revenue_df["Amount"].sum()
+    # revenue_y1 = proforma_revenue_df["Amount"].sum() + concessions + beer_garden + merchandise
+
+    stadium_rental_y1 = stadium_df["Total"].sum() * games_per_season
+    opex_y1 = proforma_opex_df["Amount"].sum()
+    game_day_y1 = proforma_gameday_df["Amount"].sum() + stadium_rental_y1
+    away_day_y1 = proforma_awayday_df["Amount"].sum()
+
+    # Additional overhead expenses
+    contingency = (game_day_y1 + away_day_y1 + opex_y1) * 0.05
+    payment_fees = (proforma_revenue_df[:4].select(pl.col("Amount").sum()).item() + concessions * 3 + beer_garden * 3 + merchandise * 3) * 0.03
+
+    overhead_y1 = proforma_overhead_df["Amount"].sum() + franchise_fee + contingency + payment_fees
+    return (
+        away_day_y1,
+        game_day_revenue_df,
+        game_day_y1,
+        opex_y1,
+        overhead_y1,
+        revenue_y1,
+    )
+
+
+@app.cell(hide_code=True)
+def _(away_day_y1, game_day_y1, opex_y1, overhead_y1, pl, revenue_y1):
+    annual_total = pl.DataFrame({
+        "Category": [
+            "Revenue",
+            "Operating Expenses",
+            "Game Day",
+            "Away Day",
+            "Overhead"
+        ],
+        "Amount": [
+            revenue_y1,
+            -opex_y1,
+            -game_day_y1,
+            -away_day_y1,
+            -overhead_y1
+        ]
+    })
+    # annual_total
+    return (annual_total,)
+
+
+@app.cell(hide_code=True)
+def _(
     financial_assumption_raw,
     mo,
     population_assumption_raw,
@@ -559,12 +646,13 @@ def _(
     )
 
 
-@app.cell
+@app.cell(hide_code=True)
 def _(
     GT,
     edit_switch,
     financial_assumption_df,
     financial_assumption_editor,
+    game_day_revenue_df,
     loc,
     mo,
     pl,
@@ -592,6 +680,10 @@ def _(
 ):
     ##### Cell C #####
 
+    ##### Poorly done, but avoids circularity #####
+    # proforma_gameday_revenue_editor = mo.ui.data_editor(game_day_revenue_df)
+    #####
+
     if edit_switch.value:
         output = mo.ui.tabs({
             "Assumptions": mo.vstack([
@@ -604,6 +696,7 @@ def _(
             "Funding Sources": startup_funding_editor,
             "Proforma": mo.vstack([
                 mo.vstack([mo.md("### Revenue"), proforma_revenue_editor]),
+                # mo.vstack([mo.md("### Game Day Revenue"), proforma_gameday_revenue_editor]),
                 mo.vstack([mo.md("### Operating Expenses"), proforma_opex_editor]),
                 mo.vstack([mo.md("### Game Day Expenses"), proforma_gameday_editor]),
                 mo.vstack([mo.md("### Away Game Expenses"), proforma_awayday_editor]),
@@ -667,6 +760,16 @@ def _(
                     },
                     fmt=vals.fmt_currency
                 ),
+                GT(game_day_revenue_df, rowname_col="Category")
+                .tab_header(title="Game Day Revenue")
+                .tab_style(style.fill("green"), loc.header())
+                .fmt_currency("Amount")
+                .grand_summary_rows(
+                    fns={
+                        "Total": pl.sum("Amount")
+                    },
+                    fmt=vals.fmt_currency
+                ),
                 GT(proforma_opex_df, rowname_col="Line Item")
                 .tab_header(title="Operating Expenses")
                 .tab_style(style.fill("red"), loc.header())
@@ -720,67 +823,40 @@ def _(
 
 
 @app.cell
-def _(
-    pl,
-    proforma_awayday_df,
-    proforma_gameday_df,
-    proforma_opex_df,
-    proforma_overhead_df,
-    proforma_revenue_df,
-    stadium_assumption_df,
-    stadium_df,
-    startup_costs_df,
-):
-    games_per_season = 3
-    attendance = stadium_assumption_df[3, 1]
-    franchise_fee = startup_costs_df[0, 1]
+def _(annual_total):
+    annual_total["Amount"].sum()
+    return
 
-    concessions = attendance * 0.5 * 10 * 3
-    beer_garden = attendance * 0.1 * 25 * 3
-    merchandise = attendance * 0.2 * 20 * 3
-    revenue_y1 = proforma_revenue_df["Amount"].sum() + concessions + beer_garden + merchandise
 
-    stadium_rental_y1 = stadium_df["Total"].sum() * games_per_season
-    opex_y1 = proforma_opex_df["Amount"].sum()
-    game_day_y1 = proforma_gameday_df["Amount"].sum() + stadium_rental_y1
-    away_day_y1 = proforma_awayday_df["Amount"].sum()
-
-    contingency = (game_day_y1 + away_day_y1 + opex_y1) * 0.05
-    payment_fees = (proforma_revenue_df[:4].select(pl.col("Amount").sum()).item() + concessions * 3 + beer_garden * 3 + merchandise * 3) * 0.03
-    overhead_y1 = proforma_overhead_df["Amount"].sum() + franchise_fee + contingency + payment_fees
-    return (
-        away_day_y1,
-        game_day_y1,
-        merchandise,
-        opex_y1,
-        overhead_y1,
-        revenue_y1,
+@app.cell
+def _(annual_total, pl):
+    total_costs_y1 = (
+        annual_total
+        .filter(pl.col("Amount") < 0)
+        .select(pl.col("Amount").sum())
+        .item()
     )
 
-
-@app.cell
-def _(merchandise):
-    merchandise
-    return
+    total_costs_y1
+    return (total_costs_y1,)
 
 
 @app.cell
-def _(proforma_revenue_df):
-    w = proforma_revenue_df
-    w
-    return
+def _(startup_costs_df):
+    initial_costs_y1 = -startup_costs_df["Amount"].sum()
+    # initial_costs_y1
+    return (initial_costs_y1,)
 
 
 @app.cell
-def _(away_day_y1, game_day_y1, opex_y1, overhead_y1, pl, revenue_y1):
-    annual_total = pl.DataFrame([
-        revenue_y1,
-        opex_y1,
-        game_day_y1,
-        away_day_y1,
-        overhead_y1
-    ])
-    annual_total
+def _(startup_funding_df):
+    sponsorships_y1 = startup_funding_df["Amount"].sum()
+    # sponsorships_y1
+    return (sponsorships_y1,)
+
+
+@app.cell
+def _():
     return
 
 
@@ -860,14 +936,15 @@ def _(mo, pd, px, returns):
 
 
 @app.cell(hide_code=True)
-def _(beta, fred, mo):
+def _(beta, mo, pd):
     kroll_erp = 0.05
     kroll_rf = 0.035 
 
-    twenty_yr = fred.get_series('DGS20')  # returns a pandas Series
+    # twenty_yr = fred.get_series('DGS20')  # returns a pandas Series
+    twenty_yr = pd.read_parquet("data/20year.parquet")  # returns a pandas Series
     spot_treasury_yield = twenty_yr.iloc[-1] / 100  # convert from 
 
-    rfr = max(kroll_rf, spot_treasury_yield)
+    rfr = max(kroll_rf, spot_treasury_yield.item())
 
     football_discount_rate = rfr + beta * kroll_erp
 
@@ -1041,19 +1118,63 @@ def _(football_discount_rate, football_growth_rate, mo):
     growth_rate = mo.ui.number(value=football_growth_rate, step=0.0001)
 
     periods_slider = mo.ui.slider(5, 20, value=10)
-    return discount_rate, growth_rate, periods_slider
+
+    scenario_dropdown = mo.ui.dropdown(options={"Basic Growth":1, "Moderate Growth":2, "5 Years Full Stadium":3},
+                            value="Basic Growth", # initial value
+                            label="Growth Scenario")
+    return discount_rate, growth_rate, periods_slider, scenario_dropdown
 
 
 @app.cell(hide_code=True)
-def _(GT, discount_rate, np, periods_slider, pl):
+def _(
+    GT,
+    discount_rate,
+    initial_costs_y1,
+    np,
+    periods_slider,
+    pl,
+    revenue_y1,
+    scenario_dropdown,
+    sponsorships_y1,
+    total_costs_y1,
+):
+    # Create dataframe from series (i.e., columns)
+    if scenario_dropdown.value == 1: # Basic Growth
+        rev_growth = 1.10
+        exp_growth = 1.04
+        capbudg_revenues = pl.Series("Revenues", [0.0] + list(revenue_y1 * (rev_growth ** np.arange(periods_slider.value))))
+        capbudg_expenses = pl.Series("Expenses", [0.0] + list(total_costs_y1 * (exp_growth ** np.arange(periods_slider.value))))
+    elif scenario_dropdown.value == 2: # Moderate Growth
+        rev_growth = 1.15
+        exp_growth = 1.06
+        capbudg_revenues = pl.Series("Revenues", [0.0] + list(revenue_y1 * (rev_growth ** np.arange(periods_slider.value))))
+        capbudg_expenses = pl.Series("Expenses", [0.0] + list(total_costs_y1 * (exp_growth ** np.arange(periods_slider.value))))
+    else:  # 3 - 5 Years to full stadium
+        ramp_end = revenue_y1 + 548220
+        revs = [0.0]
+        for i in range(1, periods_slider.value + 1):
+            if i <= 1:
+                revs.append(revenue_y1)
+            elif i < 5:
+                fraction = (i - 1) / 4
+                revs.append(revenue_y1 + 548220 * fraction + 10500 * (1.1 ** (i - 2)))
+            elif i == 5:
+                revs.append(ramp_end + 10500 * (1.1 ** 3))
+            else:
+                revs.append(revs[5] * (1.10 ** (i - 5)))
+        capbudg_revenues = pl.Series("Revenues", revs)
+        base = total_costs_y1 - 26000
+        exps = [0.0] + [base * (1.06 ** i) for i in range(periods_slider.value)]
+        capbudg_expenses = pl.Series("Expenses", exps)
+
     # Create individual series (i.e., columns)
     capbudg_period = pl.Series("Period", range(periods_slider.value + 1))
-    capbudg_cost2buy = pl.Series("Initial costs", [-416000] + [0] * (periods_slider.value))
-    capbudg_sponsorships = pl.Series("Sponsorships", [580000] + [0] * (periods_slider.value))
-    capbudg_revenues = pl.Series("Revenues", [0.0] + list(np.linspace(414038, 1245000, periods_slider.value)))
-    capbudg_expenses = pl.Series("Expenses", [0.0] + list(-701652 * (1.04 ** np.arange(periods_slider.value))))
+    capbudg_cost2buy = pl.Series("Initial costs", [initial_costs_y1] + [0] * (periods_slider.value))
+    capbudg_sponsorships = pl.Series("Sponsorships", [sponsorships_y1] + [0] * (periods_slider.value))
+    # capbudg_revenues = pl.Series("Revenues", [0.0] + list(revenue_y1 * (rev_growth ** np.arange(periods_slider.value))))
+    # capbudg_expenses = pl.Series("Expenses", [0.0] + list(total_costs_y1 * (exp_growth ** np.arange(periods_slider.value))))
 
-    # Create dataframe from series (i.e., columns)
+
     capbudg_df = pl.DataFrame([capbudg_period, capbudg_cost2buy, capbudg_sponsorships, capbudg_revenues, capbudg_expenses])
 
     # Net Cash Flows calculation
@@ -1087,17 +1208,17 @@ def _(
     capbudg,
     capbudg_df,
     discount_rate,
-    growth_rate,
     mo,
     npf,
     periods_slider,
+    scenario_dropdown,
 ):
     mo.vstack([
         mo.md("# Capital Budgeting"),
         mo.hstack([mo.md("Periods"), periods_slider, mo.md(f"{periods_slider.value} periods")], justify="start", gap=1),
         mo.vstack([
-            mo.hstack([mo.md("Discount Rate"), discount_rate, mo.md("(original = 0.0935)")], justify="start", gap=1),
-            mo.hstack([mo.md("Growth Rate"), growth_rate, mo.md("(original = 0.0400)")], justify="start", gap=1)
+            mo.hstack([mo.md("Discount Rate"), discount_rate, mo.md("(original = 0.0941)")], justify="start", gap=1),
+            scenario_dropdown        
         ]),
         mo.hstack([
             capbudg,
@@ -1106,15 +1227,15 @@ def _(
                 mo.md(f"**NPV**: ${capbudg_df['PV Net Cash Flows'].sum():,.0f}"),
                 mo.md(f"**IRR**: {npf.irr(capbudg_df['Net Cash Flows']) * 100:.2f}%"),
                 mo.md(f"**MIRR**: {npf.mirr(capbudg_df['Net Cash Flows'], discount_rate.value, discount_rate.value) * 100:.2f}%"),
-                mo.md(f"**Breakeven:** 9+ years")
+                mo.md(f"**Breakeven:** what??")
             ])
-        ])
+        ], justify="space-around", gap=1)
     ])
     return
 
 
 @app.cell
-def _(GT, html, pl, sza):
+def _(GT, html, mo, pl, scenario_dropdown, sza):
     sza_pivot = (
         pl.from_pandas(sza)
         .filter((pl.col("latitude") == "20") & (pl.col("tst") <= "1200"))
@@ -1123,7 +1244,7 @@ def _(GT, html, pl, sza):
         .pivot(values="sza", index="month", on="tst", sort_columns=True)
     )
 
-    (
+    two_way = (
         GT(sza_pivot, rowname_col="month")
         .data_color(
             domain=[90, 0],
@@ -1136,6 +1257,21 @@ def _(GT, html, pl, sza):
         )
         .sub_missing(missing_text="")
     )
+
+    mo.vstack([
+        mo.md("# Sensitivity Analysis with a two-way table"),
+        scenario_dropdown,
+        two_way
+    ])
+    return
+
+
+@app.cell
+def _(growth_rate, mo):
+    mo.vstack([
+        mo.md("# Discounted Cash Flow Model"),
+        mo.hstack([mo.md("Growth Rate"), growth_rate, mo.md("(original = 0.0400)")], justify="start", gap=1)
+    ])
     return
 
 
@@ -1147,10 +1283,33 @@ def _():
 @app.cell(column=6)
 def _(mo):
     mo.md("""
-    1. Too hot in June to watch games
-    2. Sunday games
-    3. Personal brand was at risk
+    # Is CoFL in Tyler, Texas Worth it?
+    """)
+    return
+
+
+@app.cell(hide_code=True)
+def _(mo):
+    mo.md(r"""
+    1. Only with aggressive growth, perhaps beyond what is realistic.
+    2. Requires an increase in marketing budget. Market, market market!!
+    3. Community is ripe for this. They love football and Anne loves her community
+    4. This isn't just about making money--it is a community effort
+    5. The community is growing!
+    """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.md("""
+    1. Community owned is great!
+    2. The timing is off (First communication in January)
+    3. Too hot in June to watch games
+    4. Sunday games
+    5. Personal brand was at risk
       * Wasn't sure she wanted to campaign like that in her
+    4. No control of other cities in the league--increased risk
     """)
     return
 

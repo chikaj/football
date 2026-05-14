@@ -6,54 +6,8 @@
       {},
       {},
       {
-        "type": "sub-slide"
-      },
-      {
-        "type": "fragment"
-      },
-      {
-        "type": "fragment"
-      },
-      {
-        "type": "fragment"
-      },
-      {
-        "type": "fragment"
-      },
-      {
-        "type": "fragment"
-      },
-      {
-        "type": "sub-slide"
-      },
-      {
-        "type": "fragment"
-      },
-      {
-        "type": "fragment"
-      },
-      {
-        "type": "fragment"
-      },
-      {
-        "type": "fragment"
-      },
-      {},
-      {
         "type": "skip"
       },
-      {
-        "type": "skip"
-      },
-      {
-        "type": "skip"
-      },
-      {},
-      {},
-      {
-        "type": "skip"
-      },
-      {},
       {
         "type": "skip"
       },
@@ -69,26 +23,6 @@
       {
         "type": "skip"
       },
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {
-        "type": "sub-slide"
-      },
-      {
-        "type": "sub-slide"
-      },
-      {
-        "type": "sub-slide"
-      },
-      {},
       {
         "type": "skip"
       },
@@ -96,6 +30,91 @@
         "type": "sub-slide"
       },
       {
+        "type": "skip"
+      },
+      {
+        "type": "fragment"
+      },
+      {
+        "type": "fragment"
+      },
+      {
+        "type": "fragment"
+      },
+      {
+        "type": "fragment"
+      },
+      {},
+      {
+        "type": "skip"
+      },
+      {
+        "type": "skip"
+      },
+      {
+        "type": "skip"
+      },
+      {},
+      {},
+      {
+        "type": "skip"
+      },
+      {},
+      {
+        "type": "skip"
+      },
+      {
+        "type": "skip"
+      },
+      {
+        "type": "skip"
+      },
+      {
+        "type": "skip"
+      },
+      {
+        "type": "skip"
+      },
+      {},
+      {},
+      {
+        "type": "skip"
+      },
+      {},
+      {},
+      {},
+      {
+        "type": "skip"
+      },
+      {
+        "type": "skip"
+      },
+      {
+        "type": "skip"
+      },
+      {
+        "type": "skip"
+      },
+      {},
+      {},
+      {},
+      {
+        "type": "sub-slide"
+      },
+      {
+        "type": "sub-slide"
+      },
+      {
+        "type": "sub-slide"
+      },
+      {},
+      {
+        "type": "skip"
+      },
+      {
+        "type": "sub-slide"
+      },
+      {
         "type": "sub-slide"
       },
       {},
@@ -106,9 +125,20 @@
       {},
       {},
       {},
+      {
+        "type": "sub-slide"
+      },
+      {
+        "type": "sub-slide"
+      },
       {},
       {},
-      {}
+      {
+        "type": "fragment"
+      },
+      {
+        "type": "sub-slide"
+      }
     ],
     "deck": {}
   }
