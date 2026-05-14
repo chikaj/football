@@ -1303,15 +1303,14 @@ def _(capbudg_df, discount_rate, growth_rate, mo, periods_slider):
             growth_rate
         ], justify="start", gap=1),
         mo.hstack([
-            mo.md("---"),
             mo.md("$$PV_t = \\frac{{FCF_t}}{{(1 + r)^t}}$$"),
             mo.md("$$TV = \\frac{{FCF_n \\times (1 + g)}}{{r - g}}$$"),
             mo.md("$$EV = \\sum_{{t=1}}^{{n}} PV_t + \\frac{{TV}}{{(1 + r)^n}}$$")
-        ]),
+        ], justify="space-around"),
         mo.hstack([
-            mo.md("### Enterprise Value"),
-            mo.md(f"**${ev:,.0f}**")
-        ], justify="start", gap=1)
+            mo.md("## Enterprise Value:"),
+            mo.md(f"### ${ev:,.0f}")
+        ], justify="start", gap=1).center()
     ])
     return
 
