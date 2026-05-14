@@ -53,10 +53,8 @@ def _(mo):
 
 @app.cell(hide_code=True)
 def _(base64, mo):
-    # mo.image("img/Rosestadium.jfif", width="100%")
-
-    with open("img/Rosestadium.jfif", "rb") as f:
-        img_b64 = base64.b64encode(f.read()).decode()
+    f = open("img/Rosestadium.jfif", "rb")
+    img_b64 = base64.b64encode(f.read()).decode()
     mo.Html(f"""
     <div style="position: relative; width: 100%;">
         <img src="data:image/jpeg;base64,{img_b64}" style="width: 100%; display: block;">
@@ -64,11 +62,11 @@ def _(base64, mo):
            color: black; font-size: 3rem;
            background: rgba(255, 255, 255, 0.4);
            border-radius: 8px;">
-            Continental Football League
+            Rose Stadium
         </h1>
     </div>
     """)
-    return
+    return (img_b64,)
 
 
 @app.cell
@@ -124,15 +122,6 @@ def _(mo):
 def _(mo):
     mo.md("""
     # Is the CoFL worth it for Tyler, Texas?
-    ## The CoFL Financial Model
-    """)
-    return
-
-
-@app.cell(hide_code=True)
-def _(mo):
-    mo.md(r"""
-    # Is the CoFL worth it for Anne Rhodus?
     ## The CoFL Financial Model
     """)
     return
@@ -1333,10 +1322,45 @@ def _():
 
 
 @app.cell(column=6)
-def _(mo):
-    mo.md("""
-    # Is CoFL in Tyler, Texas Worth it?
+def _(img_b64, mo):
+    mo.Html(f"""
+    <div style="position: relative; width: 100%;">
+        <img src="data:image/jpeg;base64,{img_b64}" style="width: 100%; display: block;">
+        <h1 style="position: absolute; top: 20px; left: 20px; padding: 16px 24px; margin: 0;
+           color: black; font-size: 3rem;
+           background: rgba(255, 255, 255, 0.4);
+           border-radius: 8px;">
+            Is CoFL in Tyler, Texas Worth It?
+        </h1>
+    </div>
     """)
+    return
+
+
+@app.cell
+def _(mo):
+    mo.hstack([
+        mo.md("# Yes"),
+        mo.md("# No"),
+    ], justify="space-around")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.hstack([
+        mo.md("1. With Aggressive Growth"),
+        mo.md("1. Yeah, but only with aggressive growth"),
+    ], justify="space-around")
+    return
+
+
+@app.cell
+def _(mo):
+    mo.hstack([
+        mo.md("2. With Aggressive Growth"),
+        mo.md("2. Yeah, but only with aggressive growth"),
+    ], justify="space-around")
     return
 
 

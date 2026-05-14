@@ -30,9 +30,6 @@
         "type": "sub-slide"
       },
       {
-        "type": "skip"
-      },
-      {
         "type": "fragment"
       },
       {
@@ -129,6 +126,9 @@
       {
         "type": "sub-slide"
       },
+      {},
+      {},
+      {},
       {},
       {},
       {
